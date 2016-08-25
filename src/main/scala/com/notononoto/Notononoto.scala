@@ -24,15 +24,18 @@ object Notononoto {
 
   import CommentJsonProtocol._
 
+  /** File with persistent json data */
+  val COMMENTS_FILE = "./comments.json"
+  /** Directory with static content */
+  val STATIC_DIR = "./public"
+
   val route =
     path("api" / "comments") {
       respondWithHeaders(`Access-Control-Allow-Origin`.*,
                          `Cache-Control`(CacheDirectives.`no-cache`)) {
-        // empty file should have '[]'
-        val fileName = "/home/dancing-elf/comments.json"
         implicit val codec = Codec.UTF8
         // lock here is required
-        val commentsData = io.Source.fromFile(fileName).mkString
+        val commentsData = io.Source.fromFile(COMMENTS_FILE).mkString
         get {
           complete(HttpEntity(ContentTypes.`application/json`, commentsData))
         } ~
@@ -42,11 +45,17 @@ object Notononoto {
             val oldComments = commentsData.parseJson.convertTo[Array[Comment]]
             val newComments = oldComments :+ comment
             val newCommentsData = newComments.toJson.compactPrint
-            Files.write(Paths.get(fileName),
+            Files.write(Paths.get(COMMENTS_FILE),
                         newCommentsData.getBytes(StandardCharsets.UTF_8))
             complete(HttpEntity(ContentTypes.`application/json`, newCommentsData))
         }
       }
+    } ~
+    pathSingleSlash {
+      getFromFile(STATIC_DIR + "/index.html")
+    } ~
+    get {
+      getFromDirectory(STATIC_DIR)
     }
 
   def main(args: Array[String]): Unit = {
