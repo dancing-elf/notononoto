@@ -1,5 +1,16 @@
-task build(type:Exec) {
-    workingDir '.'
-    commandLine 'node install'
-    commandLine 'node run build'
+
+task build() {
+    // Maybe inputs.file too simple for incremental build,
+    // but it should work well in most cases. At least only
+    // excessive builds possible.
+    inputs.file projectDir
+    outputs.dir buildDir
+    doLast {
+        exec {
+            commandLine "npm", "install"
+        }
+        exec {
+            commandLine "npm", "run", "build"
+        }
+    }
 }
