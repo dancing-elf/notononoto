@@ -1,0 +1,5 @@
+task build(type:Exec) {
+    workingDir '.'
+    commandLine 'node install'
+    commandLine 'node run build'
+}
