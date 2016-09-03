@@ -6,11 +6,24 @@ task build() {
     inputs.file projectDir
     outputs.dir buildDir
     doLast {
+        // webpack will be invoked with "npm run build" and
+        // resulting bundle.js will be saved to build folder
+        // by webpack itself (see webpack.config.js)
         exec {
             commandLine "npm", "install"
         }
         exec {
             commandLine "npm", "run", "build"
         }
+        // As we want to have full frontend distribution in
+        // build folder let's copy index.html
+        copy {
+            from "src/index.html"
+            into buildDir
+        }
     }
+}
+
+task clean(type: Delete) {
+    delete buildDir
 }

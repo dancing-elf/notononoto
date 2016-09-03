@@ -1,0 +1,19 @@
+apply plugin: "distribution"
+
+evaluationDependsOn(":server")
+evaluationDependsOn(":client")
+
+distributions {
+    main {
+        baseName = "notononoto"
+        contents {
+            into("lib") {
+                from project(":server").jar
+                from project(":server").configurations.runtime
+            }
+            into("webapp") {
+                from project(":client").build
+            }
+        }
+    }
+}

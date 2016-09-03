@@ -1,4 +1,4 @@
 allprojects {
-    group = 'com.notononoto'
-    version = '0.1'
+    group = "com.notononoto"
+    version = "0.1"
 }
