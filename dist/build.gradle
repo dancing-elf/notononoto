@@ -17,3 +17,13 @@ distributions {
         }
     }
 }
+
+task run(dependsOn: ":dist:installDist") {
+    doLast {
+        exec {
+            workingDir "$buildDir/install/notononoto/bin"
+            commandLine "./run.sh"
+            standardInput System.in
+        }
+    }
+}
