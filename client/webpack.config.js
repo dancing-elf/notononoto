@@ -27,6 +27,10 @@ module.exports = {
                 include: [PATHS.src],
                 test: /\.js$/,
                 plugins: ['transform-runtime']
+            },
+            {
+                loader: "style-loader!css-loader",
+                test: /\.css$/
             }
         ]
     }

@@ -1,7 +1,12 @@
 import React from "react";
-import {render} from "react-dom";
+import ReactDOM from "react-dom";
+import "./index.css";
+import MainLayout from "./containers/MainLayout";
 
-render(
-    <h1>Hello, Notononoto!</h1>,
+ReactDOM.render(
+    <MainLayout>
+        <div>Post1</div>
+        <div>Post2</div>
+    </MainLayout>,
     document.getElementById("root")
 );
