@@ -1,0 +1,3 @@
+プログラミング言語JavaおよびJavaプラットフォームは、1990年代前半にサン・マイクロシステムズでジェームズ・ゴスリン、ビル・ジョイなどの人々によって開発された。現在はJava技術の標準化作業は、Java Community Process (JCP) というプロセスを経て行われている。
+
+Javaに関わる呼称とその意味内容は、文脈に応じていくつか使い分けられている。サン・マイクロシステムズは、「Javaテクノロジ」（Java技術、Java technology）という呼称を使い、一方でJavaのさまざまな技術の形容詞として「Java」の呼称を使ってきた。多くのプログラマは、プログラミング言語の意味で「Java」の呼称を使っている。Javaの実行環境は、Java実行環境 (Java Runtime Environment; JRE) と呼ばれる。Java の基本的な開発環境は、Java開発キット (Java Development Kit; JDK) と呼ばれる。

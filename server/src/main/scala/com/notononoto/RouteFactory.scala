@@ -1,62 +1,51 @@
 package com.notononoto
 
-import java.nio.charset.StandardCharsets
-import java.nio.file.{Files, Paths}
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 
 import akka.http.scaladsl.model.headers._
-import akka.http.scaladsl.model.{ContentTypes, HttpEntity, HttpRequest, HttpResponse}
+import akka.http.scaladsl.model.{ContentTypes, HttpEntity, HttpResponse}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
-import akka.stream.scaladsl.Flow
+import com.notononoto.storage.{Comment, Post, StorageStub}
 import spray.json._
 
-import scala.io.Codec
-
-
-final case class Comment(id: Long, author: String, text: String)
-
-object CommentJsonProtocol extends DefaultJsonProtocol {
-  implicit val commentProtocol = jsonFormat3(Comment)
-}
-
-/**
-  * Factory for application routing
-  *
-  * @author dancing-elf
-  *         9/4/16.
-  */
+/** Factory for application routing */
 object RouteFactory {
 
-  import CommentJsonProtocol._
+  object JsonProtocol extends DefaultJsonProtocol {
 
-  val COMMENTS_FILE = "./comments.json"
+    /** Format of date for sending to client */
+    val format = DateTimeFormatter.ofPattern("dd-MM-yyyy")
+    /** ZonedDateTime formater */
+    implicit object DateJsonFormat extends RootJsonFormat[ZonedDateTime] {
+      def write(dateTime: ZonedDateTime) = JsString(format.format(dateTime))
+      def read(value: JsValue) =
+        throw new NotImplementedError("Read of ZonedDateTime not supported")
+    }
+
+    /** Json provider for posts */
+    implicit val postProtocol = jsonFormat5(Post)
+    /** Json provider for comments */
+    implicit val commentProtocol = jsonFormat4(Comment)
+  }
+
+  import JsonProtocol._
 
   /**
     * Create web route
-    *
     * @param webRoot directory with frontend's content
     */
   def createRoute(webRoot: String): Route = {
 
-    path("api" / "comments") {
-      respondWithHeaders(`Access-Control-Allow-Origin`.*,
-                         `Cache-Control`(CacheDirectives.`no-cache`)) {
-        implicit val codec = Codec.UTF8
-        // lock here is required
-        val commentsData = io.Source.fromFile(COMMENTS_FILE).mkString
-        get {
-          complete(HttpEntity(ContentTypes.`application/json`, commentsData))
-        } ~
-        (post & formFields('author, 'text)) {
-          (author, text) =>
-            val comment = Comment(System.nanoTime(), author, text)
-            val oldComments = commentsData.parseJson.convertTo[Array[Comment]]
-            val newComments = oldComments :+ comment
-            val newCommentsData = newComments.toJson.compactPrint
-            Files.write(Paths.get(COMMENTS_FILE),
-              newCommentsData.getBytes(StandardCharsets.UTF_8))
-            complete(HttpEntity(ContentTypes.`application/json`, newCommentsData))
-        }
+    (get & respondWithHeaders(
+      `Access-Control-Allow-Origin`.*,
+      `Cache-Control`(CacheDirectives.`no-cache`))) {
+      path("api" / "posts") {
+        complete(jsonResponse(StorageStub.loadPosts().toJson))
+      } ~
+      (path("api" / "comments") & parameter('post)) { post =>
+        complete(jsonResponse(StorageStub.loadComments(post.toInt).toJson))
       }
     } ~
     pathSingleSlash {
@@ -65,5 +54,10 @@ object RouteFactory {
     get {
       getFromDirectory(webRoot)
     }
+  }
+
+  private def jsonResponse(json: JsValue): HttpResponse = {
+    HttpResponse(entity=
+      HttpEntity(ContentTypes.`application/json`, json.compactPrint))
   }
 }

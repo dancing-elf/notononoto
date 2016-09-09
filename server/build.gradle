@@ -6,7 +6,7 @@ repositories {
 
 ext {
     scalaVersion = "2.11.8"
-    akkaVersion = "2.4.9"
+    akkaVersion = "2.4.10"
 }
 
 dependencies {
@@ -14,4 +14,7 @@ dependencies {
     compile "com.typesafe.akka:akka-http-core_2.11:$akkaVersion"
     compile "com.typesafe.akka:akka-http-experimental_2.11:$akkaVersion"
     compile "com.typesafe.akka:akka-http-spray-json-experimental_2.11:$akkaVersion"
+    testCompile "junit:junit:4.12"
+    testCompile "org.scalatest:scalatest_2.11:3.0.0"
+    testCompile "com.typesafe.akka:akka-http-testkit_2.11:$akkaVersion"
 }
