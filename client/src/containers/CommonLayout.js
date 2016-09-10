@@ -1,6 +1,8 @@
 import React, {PropTypes, Component} from "react";
 
-export default class MainLayout extends Component {
+
+/** Common layout of all pages */
+export default class CommonLayout extends Component {
     render() {
         return <div>
             <div className="header">
@@ -13,6 +15,6 @@ export default class MainLayout extends Component {
     }
 }
 
-MainLayout.propTypes = {
+CommonLayout.propTypes = {
     children: PropTypes.node.isRequired
 };

@@ -1,12 +1,12 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import "./index.css";
-import MainLayout from "./containers/MainLayout";
+import CommonLayout from "./containers/CommonLayout";
+import PostsList from "./containers/PostsList"
 
 ReactDOM.render(
-    <MainLayout>
-        <div>Post1</div>
-        <div>Post2</div>
-    </MainLayout>,
+    <CommonLayout>
+        <PostsList/>
+    </CommonLayout>,
     document.getElementById("root")
 );
