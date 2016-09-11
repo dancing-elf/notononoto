@@ -1,4 +1,5 @@
 import React, {Component} from "react";
+import {Link} from "react-router";
 import axios from "axios";
 
 
@@ -25,6 +26,7 @@ export default class PostsList extends Component {
                     <div>{post.header}</div>
                     <div>{post.dateTime}</div>
                     <div>{post.content}</div>
+                    <Link to={"/posts/" + post.id}>続きを読む...</Link>
                 </div>
             );
         });
