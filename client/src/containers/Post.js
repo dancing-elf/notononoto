@@ -21,18 +21,19 @@ export default class Post extends Component {
     render() {
         const state = this.state.data;
         const commentsNode = state.comments.map(function(comment) {
-            return <div key={comment.id}>
-		<div>{comment.dateTime}</div>
-                <div>{comment.author}</div>
-                <div>{comment.dataTime}</div>
+            return <div key={comment.id} className="comment">
+                <div>
+                    <span className="commentAuthor">{comment.author}</span>
+                    <span className="dateTime">{comment.dateTime}</span>
+                </div>
                 <div>{comment.text}</div>
             </div>;
         });
         return <div>
-            <div>{state.post.header}</div>
-            <div>{state.post.dataTime}</div>
+            <div className="dateTime">{state.post.dateTime}</div>
+            <div className="title">{state.post.header}</div>
             <div>{state.post.content}</div>
-            <div>コメント</div>
+            <div className="commentTitle">コメント</div>
             <div>{commentsNode}</div>
         </div>;
     }

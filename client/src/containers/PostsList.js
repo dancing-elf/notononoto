@@ -22,15 +22,15 @@ export default class PostsList extends Component {
     render() {
         const nodes = this.state.data.map(function(post) {
             return (
-                <div key={post.id} className="post">
-                    <div>{post.header}</div>
-                    <div>{post.dateTime}</div>
+                <div key={post.id} className="postPreview">
+                    <div className="dateTime">{post.dateTime}</div>
+                    <div className="title">{post.header}</div>
                     <div>{post.content}</div>
                     <Link to={"/posts/" + post.id}>続きを読む...</Link>
                 </div>
             );
         });
-        return <div className="postsList">
+        return <div>
             {nodes}
         </div>;
     }

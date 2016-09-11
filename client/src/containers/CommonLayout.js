@@ -6,7 +6,7 @@ export default class CommonLayout extends Component {
     render() {
         return <div>
             <div className="header">
-                <p>Notononto blog</p>
+                <p>Notononoto blog</p>
             </div>
             <div className="content">
                 {this.props.children}

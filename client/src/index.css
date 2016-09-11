@@ -1,13 +1,55 @@
-.root {
+#root {
     font-size: 16px;
+    color: rgba(0, 0, 0, 0.8);
     line-height:1.2;
+    width: 65%;
+    margin: 0 auto;
+}
+
+@media screen and (max-width: 800px) {
+    #root {
+        width: 100%;
+    }
 }
 
 .header {
-    font-size: 30px;
+    font-size: 35px;
+    font-weight: bolder;
+    color: rgba(34, 139, 34, 0.9);
+}
+
+.title {
+    font-size: 40px;
+    font-weight: bolder;
+    margin-bottom: 5px;
+}
+
+.dateTime {
+    font-size: 12px;
+    font-style: italic;
+}
+
+.comment {
+    margin-top: 7px;
+}
+
+.commentTitle {
+    margin-top: 20px;
+    color: rgba(34, 139, 34, 0.9);
+    font-style: italic;
+    font-weight: bold;
+    font-size: 24px;
+}
+
+.commentAuthor {
+    color: rgba(34, 139, 34, 0.9);
+    margin-right: 10px;
+}
+
+a {
     color: rgba(34, 139, 34, 0.8);
 }
 
-.content {
-    color: rgba(0, 0, 0, 0.8);
+.postPreview {
+    margin-bottom: 40px;
 }
