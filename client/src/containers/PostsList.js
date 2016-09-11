@@ -20,7 +20,7 @@ export default class PostsList extends Component {
             });
     }
     render() {
-        var nodes = this.state.data.map(function(post) {
+        const nodes = this.state.data.map(function(post) {
             return (
                 <div key={post.id} className="post">
                     <div>{post.header}</div>
