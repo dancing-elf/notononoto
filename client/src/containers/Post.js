@@ -1,6 +1,8 @@
 import React, {PropTypes, Component} from "react";
 import axios from "axios";
 
+import {formatDate} from "../util/util"
+
 
 /** Post description */
 export default class Post extends Component {
@@ -23,14 +25,21 @@ export default class Post extends Component {
         const commentsNode = state.comments.map(function(comment) {
             return <div key={comment.id} className="comment">
                 <div>
-                    <span className="commentAuthor">{comment.author}</span>
-                    <span className="dateTime">{comment.dateTime}</span>
+                    <span className="commentAuthor">
+                        {comment.author}
+                    </span>
+                    <span className="dateTime">
+                        {formatDate(comment.dateTime)}
+                    </span>
                 </div>
                 <div>{comment.text}</div>
             </div>;
         });
         return <div>
-            <div className="dateTime">{state.post.dateTime}</div>
+            <div className="dateTime">
+                {state.post.dateTime ?
+                    formatDate(state.post.dateTime) : undefined}
+            </div>
             <div className="title">{state.post.header}</div>
             <div>{state.post.content}</div>
             <div className="commentTitle">コメント</div>
