@@ -15,6 +15,9 @@ task build() {
         exec {
             commandLine "npm", "run", "build"
         }
+        if (!new File("$buildDir/bundle.js").exists()) {
+            throw new GradleException("bundle.js is not created")
+        }
         // As we want to have full frontend distribution in
         // build folder let's copy index.html
         copy {

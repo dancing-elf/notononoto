@@ -1,4 +1,5 @@
 const path = require('path');
+const webpack = require('webpack');
 
 const PATHS = {
     src: path.join(__dirname, 'src'),
@@ -13,6 +14,9 @@ module.exports = {
         path: PATHS.build,
         filename: 'bundle.js'
     },
+    plugins: [
+        new webpack.NoErrorsPlugin()
+    ],
     module: {
         preLoaders: [
             {

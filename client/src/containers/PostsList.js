@@ -2,7 +2,7 @@ import React, {Component} from "react";
 import {Link} from "react-router";
 import axios from "axios";
 
-import {formatDate} from "../util/util"
+import {formatDate} from "../util/util";
 
 
 /** List of posts */

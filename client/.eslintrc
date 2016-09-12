@@ -15,6 +15,7 @@
     "semi": ["error", "always"],
     "no-trailing-spaces": "error",
     "no-underscore-dangle": "off",
-    "eol-last": "off"
+    "eol-last": "off",
+    "no-console": "off"
   }
 }

@@ -1,7 +1,7 @@
 import React, {PropTypes, Component} from "react";
 import axios from "axios";
 
-import {formatDate} from "../util/util"
+import {formatDate} from "../util/util";
 
 
 /** Post description */
