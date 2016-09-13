@@ -7,14 +7,14 @@ import scala.io.Source
 
 /** Information about post */
 final case class Post(id: Long,
-                      dateTime: ZonedDateTime,
+                      timestamp: ZonedDateTime,
                       header: String,
                       content: String,
                       previewPos: Int)
 
 /** Information about comments to post */
 final case class Comment(id: Long,
-                         dateTime: ZonedDateTime,
+                         timestamp: ZonedDateTime,
                          parentId: Option[Long],
                          author: String,
                          text: String)
