@@ -3,27 +3,25 @@ const webpack = require("webpack");
 
 const PATHS = {
     src: path.join(__dirname, "src"),
-    build: path.join(__dirname, "build/prod")
+    build: path.join(__dirname, "build/dev")
 };
 
 module.exports = {
-    entry: {
-        app: PATHS.src
-    },
+    entry: [
+        "webpack-hot-middleware/client",
+        "./src/index.js"
+    ],
     output: {
         path: PATHS.build,
-        filename: "bundle.js"
+        filename: "bundle.js",
+        publicPath: 'http://localhost:8000/'
     },
     plugins: [
+        new webpack.HotModuleReplacementPlugin(),
         new webpack.NoErrorsPlugin(),
         new webpack.DefinePlugin({
             "process.env": {
-                NODE_ENV: JSON.stringify("production")
-            }
-        }),
-        new webpack.optimize.UglifyJsPlugin({
-            compress: {
-                warnings: false
+                NODE_ENV: JSON.stringify("development")
             }
         })
     ],
@@ -37,7 +35,7 @@ module.exports = {
         ],
         loaders: [
             {
-                loaders: ["babel-loader"],
+                loaders: ["react-hot", "babel-loader"],
                 include: [PATHS.src],
                 test: /\.js$/,
                 plugins: ["transform-runtime"]

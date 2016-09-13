@@ -4,7 +4,13 @@ task build() {
     // but it should work well in most cases. At least only
     // excessive builds possible.
     inputs.file projectDir
-    outputs.dir buildDir
+    // Output for production will be in 'prod' folder. Output
+    // for react hot redeploy server was set to 'dev' folder.
+    // In fact it never create this folder but for clarity
+    // we configure separated folders for dev and production
+    // mode
+    def prodOutDir = "$buildDir/prod"
+    outputs.dir prodOutDir
     doLast {
         // webpack will be invoked with "npm run build" and
         // resulting bundle.js will be saved to build folder
@@ -15,14 +21,14 @@ task build() {
         exec {
             commandLine "npm", "run", "build"
         }
-        if (!new File("$buildDir/bundle.js").exists()) {
-            throw new GradleException("bundle.js is not created")
+        if (!new File("$prodOutDir/bundle.js").exists()) {
+            throw new GradleException("$prodOutDir/bundle.js is not created")
         }
         // As we want to have full frontend distribution in
         // build folder let's copy index.html
         copy {
             from "src/index.html"
-            into buildDir
+            into prodOutDir
         }
     }
 }
