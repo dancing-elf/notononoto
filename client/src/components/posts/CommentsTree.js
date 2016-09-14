@@ -28,8 +28,8 @@ export default class CommentsTree extends Component {
 
 CommentsTree.propTypes = {
     comments: PropTypes.arrayOf(PropTypes.shape({
-        id: PropTypes.string.isRequired,
-        parentId: PropTypes.string.isRequired,
+        id: PropTypes.number.isRequired,
+        parentId: PropTypes.number,
         author: PropTypes.string.isRequired,
         timestamp: PropTypes.string.isRequired,
         text: PropTypes.string.isRequired

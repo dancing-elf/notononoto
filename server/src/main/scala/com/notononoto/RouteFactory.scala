@@ -9,6 +9,7 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import com.notononoto.storage.{Comment, Post, StorageStub}
 import spray.json._
+import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 
 
 /** Factory for application routing */
@@ -35,6 +36,7 @@ object RouteFactory {
     /** Json provider for PostData */
     implicit val postDataProtocol = jsonFormat2(PostData)
   }
+  import JsonProtocol._
 
   /**
     * Create web route
@@ -42,21 +44,35 @@ object RouteFactory {
     */
   def createRoute(webRoot: String): Route = {
 
-    import JsonProtocol._
-
     // Only existed postId can be handled
     val IntNumberExists = IntNumber
       .flatMap(id => if (isPostExists(id)) Some(id) else None)
 
-    (get & respondWithHeaders(
+    respondWithHeaders(
       `Access-Control-Allow-Origin`.*,
-      `Cache-Control`(CacheDirectives.`no-cache`))) {
-      path("api" / "posts") {
-        complete(jsonResponse(StorageStub.loadPosts().toJson))
-      } ~
-      path("api" / "post" / IntNumberExists) { postId =>
-        val (post, comments) = StorageStub.loadPost(postId)
-        complete(jsonResponse(PostData(post, comments).toJson))
+      `Cache-Control`(CacheDirectives.`no-cache`)) {
+      pathPrefix("api") {
+        get {
+          path("posts") {
+            complete(jsonResponse(StorageStub.loadPosts().toJson))
+          } ~
+          path("post" / IntNumberExists) { postId =>
+            val (post, comments) = StorageStub.loadPost(postId)
+            complete(jsonResponse(PostData(post, comments).toJson))
+          }
+        } ~
+        post {
+          (path("new_comment") & entity(as[JsValue])) {
+            (json) => {
+              val obj = json.asJsObject
+              val postIdLong = jsonField(obj, "postId").toLong
+              StorageStub.addComment(postIdLong, jsonField(obj, "author"),
+                jsonField(obj, "email"), jsonField(obj, "text"))
+              val comments = StorageStub.loadComments(postIdLong)
+              complete(jsonResponse(comments.toJson))
+            }
+          }
+        }
       }
     } ~
     (get & path("bundle.js")) {
@@ -65,6 +81,10 @@ object RouteFactory {
     get {
       getFromFile(webRoot + "/index.html")
     }
+  }
+
+  private def jsonField(obj: JsObject, name: String): String = {
+    obj.fields(name).convertTo[String]
   }
 
   private def isPostExists(id: Integer): Boolean = {

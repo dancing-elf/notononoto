@@ -11,7 +11,7 @@ export default class Article extends Component {
                 {formatDate(data.timestamp)}
             </div>
             <div className="title">
-                {data.title}
+                {data.header}
             </div>
             <div>
                 {data.content}
@@ -23,7 +23,7 @@ export default class Article extends Component {
 Article.propTypes = {
     data: PropTypes.shape({
         timestamp: PropTypes.string.isRequired,
-        title: PropTypes.string.isRequired,
+        header: PropTypes.string.isRequired,
         content: PropTypes.string.isRequired
     }).isRequired
 };

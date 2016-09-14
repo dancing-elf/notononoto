@@ -22,6 +22,12 @@ final case class Comment(id: Long,
 /** Stub for db operations until database will be selected */
 object StorageStub {
 
+  private var commentList = List(
+    Comment(1, ZonedDateTime.now(), None, "Flash", "First comment"),
+    Comment(2, ZonedDateTime.now(), None, "Jaydong", "Second comment"),
+    Comment(3, ZonedDateTime.now(), Some(2), "Zest", "Third comment")
+  )
+
   /**
     * @return list of posts
     */
@@ -50,16 +56,21 @@ object StorageStub {
     4
   }
 
+  def addComment(postId: Long,
+                 author: String,
+                 email: String,
+                 text: String): Unit = {
+    val newComment = Comment(commentList.size + 1, ZonedDateTime.now(),
+                             None, author, text)
+    commentList = commentList :+ newComment
+  }
+
   /**
-    * @param id identifier of post
+    * @param postId identifier of post
     * @return list of comments for post
     */
-  private def loadComments(id: Long): List[Comment] = {
-    List(
-      Comment(1, ZonedDateTime.now(), None, "Flash", "First comment"),
-      Comment(2, ZonedDateTime.now(), None, "Jaydong", "Second comment"),
-      Comment(3, ZonedDateTime.now(), Some(2), "Zest", "Third comment")
-    )
+  def loadComments(postId: Long): List[Comment] = {
+    commentList
   }
 
   private def read(name: String): String = {

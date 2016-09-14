@@ -10,6 +10,7 @@ export default class Post extends Component {
     constructor(props) {
         super(props);
         this.state = {data: undefined};
+        this.handleCommentSubmit = this.handleCommentSubmit.bind(this);
     }
     componentDidMount() {
         const self = this;
@@ -21,6 +22,25 @@ export default class Post extends Component {
                 console.log(error);
             });
     }
+    handleCommentSubmit(comment) {
+        const self = this;
+        axios.post("/api/new_comment", {
+            postId: this.props.params.postId,
+            author: comment.author,
+            email: comment.email,
+            text: comment.text
+        }).then(function (response) {
+            const oldData = self.state.data;
+            self.setState({
+                data: {
+                    post: oldData.post,
+                    comments: response.data
+                }
+            });
+        }).catch(function (error) {
+            console.log(error);
+        });
+    }
     render() {
         const state = this.state.data;
         if (!state) {
@@ -29,7 +49,7 @@ export default class Post extends Component {
         return <div>
             <Article data={state.post}/>
             <CommentsTree comments={state.comments}/>
-            <CommentForm/>
+            <CommentForm onCommentSubmit={this.handleCommentSubmit}/>
         </div>;
     }
 }
