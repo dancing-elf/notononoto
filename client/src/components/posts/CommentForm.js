@@ -40,15 +40,20 @@ export default class CommentForm extends Component {
                 コメントを投稿
             </div>
             <div className="comment">
-                <input type="text" onChange={this.handleAuthorChange}/>
+                <input type="text"
+                       onChange={this.handleAuthorChange}
+                       value={this.state.author}/>
                 <span>名前</span>
             </div>
             <div>
-                <input type="text" onChange={this.handleEmailChange}/>
+                <input type="text"
+                       onChange={this.handleEmailChange}
+                       value={this.state.email}/>
                 <span>メール</span>
             </div>
             <div>
-                <textarea onChange={this.handleTextChange}/>
+                <textarea onChange={this.handleTextChange}
+                          value={this.state.text}/>
             </div>
             <div>
                 <input type="submit" value="提出する"/>
