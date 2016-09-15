@@ -18,6 +18,9 @@ app.use(webpackDevMiddleware(compiler, {
 }));
 app.use(webpackHotMiddleware(compiler));
 
+app.get("/favicon.png", function (req, res) {
+    res.sendFile(__dirname + '/src/favicon.png')
+});
 app.get("*", function (req, res) {
     res.sendFile(__dirname + '/src/index.html')
 });

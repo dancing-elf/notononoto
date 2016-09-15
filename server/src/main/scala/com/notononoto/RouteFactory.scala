@@ -78,6 +78,9 @@ object RouteFactory {
     (get & path("bundle.js")) {
       getFromFile(webRoot + "/bundle.js")
     } ~
+    (get & path("favicon.png")) {
+      getFromFile(webRoot + "/favicon.png")
+    } ~
     get {
       getFromFile(webRoot + "/index.html")
     }

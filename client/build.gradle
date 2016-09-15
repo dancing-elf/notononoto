@@ -25,9 +25,13 @@ task build() {
             throw new GradleException("$prodOutDir/bundle.js is not created")
         }
         // As we want to have full frontend distribution in
-        // build folder let's copy index.html
+        // build folder let's copy index.html and favicon
         copy {
             from "src/index.html"
+            into prodOutDir
+        }
+        copy {
+            from "src/favicon.png"
             into prodOutDir
         }
     }
