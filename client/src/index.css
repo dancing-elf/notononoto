@@ -56,7 +56,7 @@ input {
     margin: 4px;
 }
 
-input[type="text"] {
+input:not([type="submit"]) {
     border: 1px solid #ccc;
 }
 
@@ -66,6 +66,10 @@ textarea {
     padding: 3px;
     margin: 4px;
     border: 1px solid #ccc;
+}
+
+textarea.error, input.error {
+    box-shadow: 0 0 3px red;
 }
 
 .postPreview {
