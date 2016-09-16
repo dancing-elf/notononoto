@@ -7,21 +7,24 @@ export default class CommentsTree extends Component {
     render() {
         return <div>
             <div className="commentTitle">コメント</div>
-            <div>
+            <table>
                 {this.props.comments.map(function (comment) {
-                    return <div key={comment.id} className="comment">
-                        <div>
-                        <span className="commentAuthor">
-                            {comment.author}
-                        </span>
-                            <span className="dateTime">
-                            {formatDate(comment.timestamp)}
-                        </span>
-                        </div>
-                        <div>{comment.text}</div>
-                    </div>;
+                    return <tr key={comment.id} className="comment">
+                        <td>{comment.id}.</td>
+                        <td>
+                            <div>{comment.text}</div>
+                            <div className="commentBox">
+                                <span>{comment.author}</span>
+                                <span>{formatDate(comment.timestamp)}</span>
+                            </div>
+                            <div className="answerBox">
+                                <a href="#commentInput">答え</a>
+                                <a href="#commentInput">引用</a>
+                            </div>
+                        </td>
+                    </tr>;
                 })}
-            </div>
+            </table>
         </div>;
     }
 }

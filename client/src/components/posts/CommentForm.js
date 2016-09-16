@@ -86,7 +86,8 @@ export default class CommentForm extends Component {
                        value={this.state.email}/>
             </div>
             <div>
-                <textarea className={this.state.textHasError ? "error" : null}
+                <textarea id="commentInput"
+                          className={this.state.textHasError ? "error" : null}
                           placeholder="コメントを追加..."
                           onChange={this.handleTextChange}
                           value={this.state.text}/>

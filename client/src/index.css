@@ -26,13 +26,9 @@
     margin-bottom: 5px;
 }
 
-.dateTime {
-    font-size: 12px;
-    font-style: italic;
-}
-
-.comment {
-    margin-top: 7px;
+.comment td {
+    vertical-align: top;
+    padding-bottom: 20px;
 }
 
 .commentTitle {
@@ -41,8 +37,16 @@
     font-weight: bolder;
 }
 
-.commentAuthor {
-    font-weight: bolder;
+.commentBox {
+    color: gray;
+    margin-top: 10px;
+}
+
+.commentBox span:first-child {
+    margin-right: 5px;
+}
+
+.answerBox a:first-child {
     margin-right: 10px;
 }
 
