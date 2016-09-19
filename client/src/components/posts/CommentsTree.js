@@ -1,13 +1,16 @@
 import React, {PropTypes, Component} from "react";
+import {connect} from "react-redux";
 
+import {makeAnswer, makeQuote} from "../../reducers/post";
 import {formatDate} from "../../util/util";
 
 
-export default class CommentsTree extends Component {
+class CommentsTree extends Component {
     render() {
+        const self = this;
         return <div>
             <div className="commentTitle">コメント</div>
-            <table>
+            <table><tbody>
                 {this.props.comments.map(function (comment) {
                     return <tr key={comment.id} className="comment">
                         <td>{comment.id}.</td>
@@ -18,13 +21,24 @@ export default class CommentsTree extends Component {
                                 <span>{formatDate(comment.timestamp)}</span>
                             </div>
                             <div className="answerBox">
-                                <a href="#commentInput">答え</a>
-                                <a href="#commentInput">引用</a>
+                                <a href="#commentInput"
+                                   onClick={function() {
+                                       self.props.makeAnswer(comment.author);
+                                   }}>
+                                    答え
+                                </a>
+                                <a href="#commentInput"
+                                   onClick={function() {
+                                       self.props.makeQuote(
+                                           comment.author, comment.text);
+                                   }}>
+                                    引用
+                                </a>
                             </div>
                         </td>
                     </tr>;
                 })}
-            </table>
+            </tbody></table>
         </div>;
     }
 }
@@ -36,5 +50,16 @@ CommentsTree.propTypes = {
         author: PropTypes.string.isRequired,
         timestamp: PropTypes.string.isRequired,
         text: PropTypes.string.isRequired
-    })).isRequired
+    })).isRequired,
+    makeQuote: PropTypes.func.isRequired,
+    makeAnswer: PropTypes.func.isRequired
 };
+
+function mapDispatchToProps(dispatch) {
+    return {
+        makeQuote: makeQuote(dispatch),
+        makeAnswer: makeAnswer(dispatch),
+    };
+}
+
+export default connect(undefined, mapDispatchToProps)(CommentsTree);

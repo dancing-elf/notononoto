@@ -1,55 +1,21 @@
 import React, {PropTypes, Component} from "react";
-import axios from "axios";
+import {connect} from "react-redux";
 
+import {getPost, loadPost, getComments} from "../../reducers/post";
 import Article from "./Article";
 import CommentsTree from "./CommentsTree";
 import CommentForm from "./CommentForm";
 
 /** Post description */
-export default class Post extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {data: undefined};
-        this.handleCommentSubmit = this.handleCommentSubmit.bind(this);
-    }
+export class Post extends Component {
     componentDidMount() {
-        const self = this;
-        axios.get("/api/post/" + this.props.params.postId)
-            .then(function (response) {
-                self.setState({data: response.data});
-            })
-            .catch(function (error) {
-                console.log(error);
-            });
-    }
-    handleCommentSubmit(comment) {
-        const self = this;
-        axios.post("/api/new_comment", {
-            postId: this.props.params.postId,
-            author: comment.author,
-            email: comment.email,
-            text: comment.text
-        }).then(function (response) {
-            const oldData = self.state.data;
-            self.setState({
-                data: {
-                    post: oldData.post,
-                    comments: response.data
-                }
-            });
-        }).catch(function (error) {
-            console.log(error);
-        });
+        this.props.loadPost(this.props.params.postId);
     }
     render() {
-        const state = this.state.data;
-        if (!state) {
-            return <div></div>;
-        }
         return <div>
-            <Article data={state.post}/>
-            <CommentsTree comments={state.comments}/>
-            <CommentForm onCommentSubmit={this.handleCommentSubmit}/>
+            <Article post={this.props.post}/>
+            <CommentsTree comments={this.props.comments}/>
+            <CommentForm/>
         </div>;
     }
 }
@@ -57,5 +23,23 @@ export default class Post extends Component {
 Post.propTypes = {
     params: PropTypes.shape({
         postId: PropTypes.string.isRequired
-    })
+    }),
+    post: PropTypes.object,
+    comments: PropTypes.array,
+    loadPost: PropTypes.func
 };
+
+function mapStateToProps(state) {
+    return {
+        post: getPost(state),
+        comments: getComments(state)
+    };
+}
+
+function mapDispatchToProps(dispatch) {
+    return {
+        loadPost: (postId) => loadPost(postId, dispatch)
+    };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Post);

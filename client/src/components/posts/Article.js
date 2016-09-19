@@ -5,23 +5,26 @@ import {formatDate} from "../../util/util";
 
 export default class Article extends Component {
     render() {
-        const data = this.props.data;
+        const post = this.props.post;
+        if (!post.timestamp) {
+            return <div></div>;
+        }
         return <div>
             <div className="dateTime">
-                {formatDate(data.timestamp)}
+                {formatDate(post.timestamp)}
             </div>
             <div className="title">
-                {data.header}
+                {post.header}
             </div>
             <div>
-                {data.content}
+                {post.content}
             </div>
         </div>;
     }
 }
 
 Article.propTypes = {
-    data: PropTypes.shape({
+    post: PropTypes.shape({
         timestamp: PropTypes.string.isRequired,
         header: PropTypes.string.isRequired,
         content: PropTypes.string.isRequired

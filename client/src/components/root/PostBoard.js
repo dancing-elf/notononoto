@@ -1,29 +1,19 @@
-import React, {Component} from "react";
+import React, {Component, PropTypes} from "react";
+import {connect} from "react-redux";
 import {Link} from "react-router";
-import axios from "axios";
 
+import {getPosts, loadPosts} from "../../reducers/postBoard";
 import {formatDate} from "../../util/util";
 
 
 /** List of posts */
-export default class PostBoard extends Component {
-    constructor(props) {
-        super(props);
-        this.state = {data: []};
-    }
+class PostBoard extends Component {
     componentDidMount() {
-        const self = this;
-        axios.get("/api/posts")
-            .then(function (response) {
-                self.setState({data: response.data});
-            })
-            .catch(function (error) {
-                console.log(error);
-            });
+        this.props.loadPosts();
     }
     render() {
         return <div>
-            {this.state.data.map(function (post) {
+            {this.props.posts.map(function (post) {
                 return (
                     <div key={post.id} className="postPreview">
                         <div className="dateTime">
@@ -44,3 +34,27 @@ export default class PostBoard extends Component {
         </div>;
     }
 }
+
+PostBoard.propTypes = {
+    posts: PropTypes.arrayOf(PropTypes.shape({
+        id: PropTypes.number.isRequired,
+        timestamp: PropTypes.string.isRequired,
+        header: PropTypes.string.isRequired,
+        content: PropTypes.string.isRequired
+    })).isRequired,
+    loadPosts: PropTypes.func.isRequired
+};
+
+const mapStateToProps = (state) => {
+    return {
+        posts: getPosts(state)
+    };
+};
+
+function mapDispatchToProps(dispatch) {
+    return {
+        loadPosts: () => loadPosts(dispatch),
+    };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(PostBoard);

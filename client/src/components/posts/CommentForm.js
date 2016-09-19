@@ -1,96 +1,55 @@
 import React, {PropTypes, Component} from "react";
+import {connect} from "react-redux";
+
+import {
+    getPostId,
+    getInputState,
+    submitCommentForm,
+    updateAuthor,
+    updateComment,
+    updateEmail
+} from "../../reducers/post";
 
 
-export default class CommentForm extends Component {
-    constructor(props) {
-        super(props);
-        this.state = INITIAL_STATE;
-        this.handleAuthorChange = this.handleAuthorChange.bind(this);
-        this.handleEmailChange = this.handleEmailChange.bind(this);
-        this.handleTextChange = this.handleTextChange.bind(this);
-        this.handleSubmit = this.handleSubmit.bind(this);
-    }
+export class CommentForm extends Component {
     handleAuthorChange(e) {
-        const input = e.target.value;
-        if (input.trim().length < 50) {
-            this.setState({author: input});
-        }
+        this.props.updateAuthor(e.target.value);
     }
     handleEmailChange(e) {
-        const input = e.target.value;
-        if (input.trim().length < 50) {
-            this.setState({email: input});
-        }
+        this.props.updateEmail(e.target.value);
     }
-    handleTextChange(e) {
-        const input = e.target.value;
-        if (input.trim().length < 10000) {
-            this.setState({text: input});
-        }
+    handleCommentChange(e) {
+        this.props.updateComment(e.target.value);
     }
     handleSubmit(e) {
         e.preventDefault();
-        const author = this.state.author.trim();
-        const email = this.state.email.trim();
-        const text = this.state.text.trim();
-
-        let authorHasError = false;
-        let emailHasError = false;
-        let textHasError = false;
-
-        if (!text) {
-            textHasError = true;
-        }
-        // not perfect but relatively simple.
-        // html5 validation in react with firefox highlight input as error
-        // before submission. Complex regexp should be implemented on server
-        // side too. In any case this email is not very important
-        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-            emailHasError = true;
-        }
-        if (!author) {
-            authorHasError = true;
-        }
-        if (!authorHasError && !emailHasError && !textHasError) {
-            this.props.onCommentSubmit({
-                author: author,
-                email: email,
-                text: text
-            });
-            this.setState(INITIAL_STATE);
-        } else {
-            this.setState({
-                authorHasError: authorHasError,
-                emailHasError: emailHasError,
-                textHasError: textHasError
-            });
-        }
+        this.props.submit();
     }
     render() {
-        return <form noValidate onSubmit={this.handleSubmit}>
+        return <form noValidate onSubmit={this.handleSubmit.bind(this)}>
             <div className="commentTitle">
                 コメントを投稿
             </div>
-            <div className="comment">
+            <div>
                 <input type="text"
-                       className={this.state.authorHasError ? "error" : null}
+                       className={this.props.authorHasError ? "error" : null}
                        placeholder="名前 (必須)"
-                       onChange={this.handleAuthorChange}
-                       value={this.state.author}/>
+                       onChange={this.handleAuthorChange.bind(this)}
+                       value={this.props.authorValue}/>
             </div>
             <div>
                 <input type="email"
-                       className={this.state.emailHasError ? "error" : null}
+                       className={this.props.emailHasError ? "error" : null}
                        placeholder="メール (非公開) (必須)"
-                       onChange={this.handleEmailChange}
-                       value={this.state.email}/>
+                       onChange={this.handleEmailChange.bind(this)}
+                       value={this.props.emailValue}/>
             </div>
             <div>
                 <textarea id="commentInput"
-                          className={this.state.textHasError ? "error" : null}
+                          className={this.props.commentHasError ? "error" : null}
                           placeholder="コメントを追加..."
-                          onChange={this.handleTextChange}
-                          value={this.state.text}/>
+                          onChange={this.handleCommentChange.bind(this)}
+                          value={this.props.commentValue}/>
             </div>
             <div>
                 <input type="submit" value="コメントを送信"/>
@@ -100,14 +59,41 @@ export default class CommentForm extends Component {
 }
 
 CommentForm.propTypes = {
-    onCommentSubmit: PropTypes.func.isRequired,
+    postId: PropTypes.string.isRequired,
+
+    submit: PropTypes.func.isRequired,
+    updateAuthor: PropTypes.func.isRequired,
+    updateEmail: PropTypes.func.isRequired,
+    updateComment: PropTypes.func.isRequired,
+
+    authorValue: PropTypes.string.isRequired,
+    authorHasError: PropTypes.bool.isRequired,
+    emailValue: PropTypes.string.isRequired,
+    emailHasError: PropTypes.bool.isRequired,
+    commentValue: PropTypes.string.isRequired,
+    commentHasError: PropTypes.bool.isRequired
 };
 
-const INITIAL_STATE = {
-    author: "",
-    authorHasError: false,
-    email: "",
-    emailHasError: false,
-    text: "",
-    textHasError: false
-};
+function mapStateToProps(state) {
+    const inputState = getInputState(state);
+    return {
+        postId: getPostId(state),
+        authorValue: inputState.authorValue,
+        authorHasError: inputState.authorHasError,
+        emailValue: inputState.emailValue,
+        emailHasError: inputState.emailHasError,
+        commentValue: inputState.commentValue,
+        commentHasError: inputState.commentHasError,
+    };
+}
+
+function mapDispatchToProps(dispatch) {
+    return {
+        submit: () => dispatch(submitCommentForm()),
+        updateAuthor: updateAuthor(dispatch),
+        updateEmail: updateEmail(dispatch),
+        updateComment: updateComment(dispatch),
+    };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(CommentForm);
