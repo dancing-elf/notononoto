@@ -1,7 +1,7 @@
 import React, {PropTypes, Component} from "react";
 import {connect} from "react-redux";
 
-import {makeAnswer, makeQuote} from "../../reducers/post";
+import {makeAnswer, makeQuote} from "../../reducers/commentForm";
 import {formatDate} from "../../util/util";
 
 

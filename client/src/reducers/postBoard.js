@@ -1,5 +1,6 @@
 import axios from "axios";
 
+import {copy} from "../util/util";
 import {LOAD_POSTS} from "../constants/ActionTypes";
 
 const initialState = { posts: [] };
@@ -7,7 +8,7 @@ const initialState = { posts: [] };
 export function postBoard(state = initialState, action) {
     switch (action.type) {
         case LOAD_POSTS: {
-            return Object.assign({}, state, {posts: action.posts});
+            return copy(state, {posts: action.posts});
         }
         default:
             return state;

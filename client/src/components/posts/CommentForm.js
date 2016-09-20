@@ -1,14 +1,14 @@
 import React, {PropTypes, Component} from "react";
 import {connect} from "react-redux";
 
+import {getPostId} from "../../reducers/post";
 import {
-    getPostId,
     getInputState,
     submitCommentForm,
     updateAuthor,
     updateComment,
     updateEmail
-} from "../../reducers/post";
+} from "../../reducers/commentForm";
 
 
 export class CommentForm extends Component {
