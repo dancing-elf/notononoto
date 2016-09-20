@@ -16,10 +16,13 @@ import {
 const initialState = {
     authorValue: "",
     authorHasError: false,
+    authorHasFocus: false,
     emailValue: "",
     emailHasError: false,
+    emailHasFocus: false,
     commentValue: "",
     commentHasError: false,
+    commentHasFocus: false,
 };
 
 export function commentForm(state = initialState, action) {
@@ -34,18 +37,30 @@ export function commentForm(state = initialState, action) {
             return action.value.length >= 10000 ?
                 state : copy(state, {commentValue: action.value});
         case REPLY_COMMENT:
-            return copy(state,
-                {commentValue: "<b>" + action.author + "</b>" + state.commentValue});
+            return copy(state, {
+                commentValue: "<b>" + action.author + "</b>" + state.commentValue,
+                authorHasFocus: false,
+                emailHasFocus: false,
+                commentHasFocus: true
+            });
         case QUOTE_COMMENT:
-            return copy(state,
-                {commentValue: "<b>" + action.comment + "</b>" + state.commentValue});
+            return copy(state, {
+                commentValue: "<b>" + action.comment + "</b>" + state.commentValue,
+                authorHasFocus: false,
+                emailHasFocus: false,
+                commentHasFocus: true
+            });
         case CLEAN_COMMENT_FORM:
             return initialState;
         case COMMENT_INVALID:
             return copy(state, {
                 authorHasError: action.authorHasError,
                 emailHasError: action.emailHasError,
-                commentHasError: action.commentHasError
+                commentHasError: action.commentHasError,
+
+                authorHasFocus: action.authorHasFocus,
+                emailHasFocus: action.emailHasFocus,
+                commentHasFocus: action.commentHasFocus
             });
         default:
             return state;
@@ -110,7 +125,11 @@ export function submitCommentForm() {
                 type: COMMENT_INVALID,
                 authorHasError: authorHasError,
                 emailHasError: emailHasError,
-                commentHasError: commentHasError
+                commentHasError: commentHasError,
+
+                authorHasFocus: authorHasError,
+                emailHasFocus: !authorHasError && emailHasError,
+                commentHasFocus: !authorHasError && !emailHasError && commentHasError
             });
         }
     };

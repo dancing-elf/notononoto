@@ -21,14 +21,14 @@ class CommentsTree extends Component {
                                 <span>{formatDate(comment.timestamp)}</span>
                             </div>
                             <div className="answerBox">
-                                <a href="#commentInput"
-                                   onClick={function() {
+                                <a href="javascript:void(0);"
+                                   onClick={function () {
                                        self.props.makeAnswer(comment.author);
                                    }}>
                                     答え
                                 </a>
-                                <a href="#commentInput"
-                                   onClick={function() {
+                                <a href="javascript:void(0);"
+                                   onClick={function () {
                                        self.props.makeQuote(
                                            comment.author, comment.text);
                                    }}>
