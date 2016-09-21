@@ -1,7 +1,5 @@
-import axios from "axios";
-
 import {copy} from "../util/util";
-import {LOAD_POST, UPDATE_COMMENTS} from "../constants/ActionTypes";
+import {LOAD_POST, UPDATE_COMMENTS} from "../actions/ActionTypes";
 
 const initialState = {
     postId: "",
@@ -13,6 +11,12 @@ const initialState = {
     comments: []
 };
 
+/**
+ * Reducer of Post component
+ * @param state post's state
+ * @param action action to do
+ * @returns {*} new state after doing action
+ */
 export function post(state = initialState, action) {
     switch (action.type) {
         case LOAD_POST:
@@ -28,35 +32,26 @@ export function post(state = initialState, action) {
     }
 }
 
-export function getPost(state) {
+/**
+ * @param state global redux state
+ * @returns {object} post data
+ */
+export function getPostState(state) {
     return state.post.post;
 }
 
-export function getComments(state) {
+/**
+ * @param state global redux state
+ * @returns {array} post's comment
+ */
+export function getCommentsState(state) {
     return state.post.comments;
 }
 
-export function getPostId(state) {
+/**
+ * @param state global redux state
+ * @returns {string} post id
+ */
+export function getPostIdState(state) {
     return state.post.postId;
-}
-
-export function loadPost(postId, dispatch) {
-    axios.get("/api/post/" + postId)
-        .then(function (response) {
-            dispatch({
-                type: LOAD_POST,
-                postId: postId,
-                post: response.data.post,
-                comments: response.data.comments});
-        })
-        .catch(function (error) {
-            console.log(error);
-        });
-}
-
-export function updateComments(comments, dispatch) {
-    dispatch({
-        type: UPDATE_COMMENTS,
-        comments: comments
-    });
 }

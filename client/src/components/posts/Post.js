@@ -1,10 +1,15 @@
 import React, {PropTypes, Component} from "react";
 import {connect} from "react-redux";
 
-import {getPost, loadPost, getComments} from "../../reducers/post";
 import Article from "./Article";
 import CommentsTree from "./CommentsTree";
 import CommentForm from "./CommentForm";
+import {
+    getPostState,
+    getCommentsState
+} from "../../reducers/post";
+import {createLoadPostFunction} from "../../actions/postActions";
+
 
 /** Post description */
 export class Post extends Component {
@@ -24,21 +29,21 @@ Post.propTypes = {
     params: PropTypes.shape({
         postId: PropTypes.string.isRequired
     }),
-    post: PropTypes.object,
-    comments: PropTypes.array,
-    loadPost: PropTypes.func
+    post: PropTypes.object.isRequired,
+    comments: PropTypes.array.isRequired,
+    loadPost: PropTypes.func.isRequired
 };
 
 function mapStateToProps(state) {
     return {
-        post: getPost(state),
-        comments: getComments(state)
+        post: getPostState(state),
+        comments: getCommentsState(state)
     };
 }
 
 function mapDispatchToProps(dispatch) {
     return {
-        loadPost: (postId) => loadPost(postId, dispatch)
+        loadPost: createLoadPostFunction(dispatch)
     };
 }
 

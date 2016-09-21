@@ -1,10 +1,14 @@
 import React, {PropTypes, Component} from "react";
 import {connect} from "react-redux";
 
-import {makeAnswer, makeQuote} from "../../reducers/commentForm";
 import {formatDate} from "../../util/util";
+import {
+    createAnswerFunction,
+    createQuoteFunction
+} from "../../actions/commentFormActions";
 
 
+/** Post's comments */
 class CommentsTree extends Component {
     render() {
         const self = this;
@@ -23,13 +27,13 @@ class CommentsTree extends Component {
                             <div className="answerBox">
                                 <a href="javascript:void(0);"
                                    onClick={function () {
-                                       self.props.makeAnswer(comment.author);
+                                       self.props.answer(comment.author);
                                    }}>
                                     答え
                                 </a>
                                 <a href="javascript:void(0);"
                                    onClick={function () {
-                                       self.props.makeQuote(
+                                       self.props.quote(
                                            comment.author, comment.text);
                                    }}>
                                     引用
@@ -51,14 +55,14 @@ CommentsTree.propTypes = {
         timestamp: PropTypes.string.isRequired,
         text: PropTypes.string.isRequired
     })).isRequired,
-    makeQuote: PropTypes.func.isRequired,
-    makeAnswer: PropTypes.func.isRequired
+    quote: PropTypes.func.isRequired,
+    answer: PropTypes.func.isRequired
 };
 
 function mapDispatchToProps(dispatch) {
     return {
-        makeQuote: makeQuote(dispatch),
-        makeAnswer: makeAnswer(dispatch),
+        quote: createQuoteFunction(dispatch),
+        answer: createAnswerFunction(dispatch),
     };
 }
 

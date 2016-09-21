@@ -1,35 +1,49 @@
 import React, {PropTypes, Component} from "react";
 import {connect} from "react-redux";
 
-import {getPostId} from "../../reducers/post";
+import {getPostIdState} from "../../reducers/post";
 import {
-    getInputState,
-    submitCommentForm,
-    updateAuthor,
-    updateComment,
-    updateEmail
+    AUTHOR_INPUT,
+    EMAIL_INPUT,
+    COMMENT_INPUT,
+    USER_DEFINED,
+    getCommentFormState,
 } from "../../reducers/commentForm";
+import {
+    createSubmitCommentAction,
+    createUpdateAuthorFunction,
+    createUpdateCommentFunction,
+    createUpdateEmailFunction,
+    createResetFocusFunction
+} from "../../actions/commentFormActions";
 
 
+/** Form for user's comment input */
 export class CommentForm extends Component {
-    componentDidUpdate(prevProps) {
-
-        const curProps = this.props;
-        // Change focus when needed. If user click on another input
-        // don't set focus from props
-        if (curProps.authorHasFocus === prevProps.authorHasFocus &&
-            curProps.emailHasFocus === prevProps.emailHasFocus &&
-            curProps.commentHasFocus === prevProps.commentHasFocus) {
-            return;
+    componentDidUpdate() {
+        switch (this.props.focusInput) {
+            case USER_DEFINED:
+                // no action needed. Focus should be managed by user.
+                // Not Redux.
+                return;
+            case AUTHOR_INPUT:
+                this.refs.authorInput.focus();
+                break;
+            case EMAIL_INPUT:
+                this.refs.emailInput.focus();
+                break;
+            case COMMENT_INPUT:
+                this.refs.commentInput.focus();
+                break;
+            default:
+                throw new Error(
+                    "Unexpected focus element: " + this.props.focusInput);
         }
-
-        if (curProps.authorHasFocus) {
-            this.refs.authorInput.focus();
-        } else if (curProps.emailHasFocus) {
-            this.refs.emailInput.focus();
-        } else if (curProps.commentHasFocus) {
-            this.refs.commentInput.focus();
-        }
+        // We don't want problem with events like "user click another input"
+        // because it's hard to determine when we should invoke code above.
+        // Simply reset focusInput property after we set focus.
+        // Too complicated in any case but how we can do it with Redux better?
+        this.props.resetAutoFocus();
     }
     handleAuthorChange(e) {
         this.props.updateAuthor(e.target.value);
@@ -87,30 +101,32 @@ CommentForm.propTypes = {
     updateAuthor: PropTypes.func.isRequired,
     updateEmail: PropTypes.func.isRequired,
     updateComment: PropTypes.func.isRequired,
+    resetAutoFocus: PropTypes.func.isRequired,
 
     authorValue: PropTypes.string.isRequired,
     authorHasError: PropTypes.bool.isRequired,
-    authorHasFocus: PropTypes.bool.isRequired,
 
     emailValue: PropTypes.string.isRequired,
     emailHasError: PropTypes.bool.isRequired,
-    emailHasFocus: PropTypes.bool.isRequired,
 
     commentValue: PropTypes.string.isRequired,
     commentHasError: PropTypes.bool.isRequired,
-    commentHasFocus: PropTypes.bool.isRequired,
+
+    focusInput: PropTypes.string
 };
 
 function mapStateToProps(state) {
-    return Object.assign({postId: getPostId(state)}, getInputState(state));
+    return Object.assign(
+        {postId: getPostIdState(state)}, getCommentFormState(state));
 }
 
 function mapDispatchToProps(dispatch) {
     return {
-        submit: () => dispatch(submitCommentForm()),
-        updateAuthor: updateAuthor(dispatch),
-        updateEmail: updateEmail(dispatch),
-        updateComment: updateComment(dispatch),
+        submit: () => dispatch(createSubmitCommentAction()),
+        updateAuthor: createUpdateAuthorFunction(dispatch),
+        updateEmail: createUpdateEmailFunction(dispatch),
+        updateComment: createUpdateCommentFunction(dispatch),
+        resetAutoFocus: createResetFocusFunction(dispatch)
     };
 }
 

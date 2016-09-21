@@ -2,7 +2,8 @@ import React, {Component, PropTypes} from "react";
 import {connect} from "react-redux";
 import {Link} from "react-router";
 
-import {getPosts, loadPosts} from "../../reducers/postBoard";
+import {getPosts} from "../../reducers/postBoard";
+import {createLoadPostsFunction} from "../../actions/postBoardActions";
 import {formatDate} from "../../util/util";
 
 
@@ -53,7 +54,7 @@ const mapStateToProps = (state) => {
 
 function mapDispatchToProps(dispatch) {
     return {
-        loadPosts: () => loadPosts(dispatch),
+        loadPosts: createLoadPostsFunction(dispatch),
     };
 }
 

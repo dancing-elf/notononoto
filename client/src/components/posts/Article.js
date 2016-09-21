@@ -3,6 +3,7 @@ import React, {PropTypes, Component} from "react";
 import {formatDate} from "../../util/util";
 
 
+/** Main article with it's properties */
 export default class Article extends Component {
     render() {
         const post = this.props.post;
@@ -10,7 +11,7 @@ export default class Article extends Component {
             return <div></div>;
         }
         return <div>
-            <div className="dateTime">
+            <div>
                 {formatDate(post.timestamp)}
             </div>
             <div className="title">

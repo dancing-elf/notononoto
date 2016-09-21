@@ -5,9 +5,10 @@ import {Router, Route, IndexRoute, browserHistory} from "react-router";
 
 import "./index.css";
 import CommonLayout from "./components/common/CommonLayout";
-import PostBoard from "./components/root/PostBoard";
+import PostBoard from "./components/index/PostBoard";
 import Post from "./components/posts/Post";
 import configureStore from "./store/configureStore";
+
 
 const store = configureStore();
 
