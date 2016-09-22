@@ -7,6 +7,7 @@ import "./index.css";
 import CommonLayout from "./components/common/CommonLayout";
 import PostBoard from "./components/index/PostBoard";
 import Post from "./components/posts/Post";
+import About from "./components/about/About";
 import configureStore from "./store/configureStore";
 
 
@@ -18,6 +19,7 @@ ReactDOM.render(
             <Route path="/" component={CommonLayout}>
                 <IndexRoute component={PostBoard}/>
                 <Route path="posts/:postId" component={Post}/>
+                <Route path="about" component={About}/>
             </Route>
         </Router>
     </Provider>,
