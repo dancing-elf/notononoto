@@ -11,7 +11,7 @@ export default class Article extends Component {
             return <div></div>;
         }
         return <div>
-            <div>
+            <div className="dateTime">
                 {formatDate(post.timestamp)}
             </div>
             <div className="title">

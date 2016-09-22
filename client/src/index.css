@@ -31,10 +31,10 @@ html, body {
 #header {
     font-size: 45px;
     font-weight: bolder;
-    color: rgba(34, 139, 34, 0.9);
+    color: forestgreen;
     margin-top: 45px;
     margin-bottom: 45px;
-    border-bottom: solid 5px rgba(34, 139, 34, 0.9);
+    border-bottom: solid 5px forestgreen;
 }
 
 #content {
@@ -43,7 +43,7 @@ html, body {
 
 #footer {
     margin-top: 30px;
-    border-top: solid 5px rgba(34, 139, 34, 0.9);
+    border-top: solid 5px forestgreen;
     height: 50px;
 }
 
@@ -54,6 +54,9 @@ html, body {
 #footer div a {
     font-size: 20px;
     font-weight: bold;
+}
+
+.dateTime {
 }
 
 .title {
@@ -87,7 +90,7 @@ html, body {
 }
 
 a {
-    color: rgba(34, 139, 34, 0.8);
+    color: forestgreen;
 }
 
 input {
