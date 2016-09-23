@@ -4,10 +4,20 @@ import {postBoard} from "./postBoard";
 import {post} from "./post";
 import {commentForm} from "./commentForm";
 
-/** Object for global Redux state management */
-export default combineReducers({
+import {RESET_PAGE_STATE} from "../actions/ActionTypes";
+
+/** Object for application state management */
+const appReducer = combineReducers({
     page,
     postBoard,
     post,
     commentForm
 });
+
+/** We need opportunity to reset state of Redux */
+export default function rootReducer(state, action) {
+    if (action.type === RESET_PAGE_STATE) {
+        state = undefined;
+    }
+    return appReducer(state, action);
+}

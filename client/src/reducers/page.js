@@ -2,7 +2,6 @@ import {copy} from "../util/util";
 import {
     NOT_FOUND,
     LOAD_ERROR,
-    RESET_PAGE_STATE
 } from "../actions/ActionTypes";
 
 export const OK_STATE = "OK_STATE";
@@ -22,8 +21,6 @@ const initialState = {
  */
 export function page(state = initialState, action) {
     switch (action.type) {
-        case RESET_PAGE_STATE:
-            return copy(state, {state: OK_STATE});
         case NOT_FOUND:
             return copy(state, {state: NOT_FOUND_STATE});
         case LOAD_ERROR:

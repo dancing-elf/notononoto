@@ -9,16 +9,17 @@ import PostBoard from "./components/index/PostBoard";
 import Post from "./components/posts/Post";
 import About from "./components/about/About";
 import NotFoundError from "./components/errors/NotFoundError";
-import {createPageStateAction} from "./actions/pageActions";
+import {createResetPageStateAction} from "./actions/pageActions";
 import configureStore from "./store/configureStore";
 
 
 const store = configureStore();
 
-// we should reset page state, because Redux store share
-// error state between all pages
+// we should reset page state, because Redux share state between
+// all pages. It's share page errors, inputs and etc. We don't
+// need this
 function resetPageState() {
-    store.dispatch(createPageStateAction());
+    store.dispatch(createResetPageStateAction());
 }
 
 ReactDOM.render(

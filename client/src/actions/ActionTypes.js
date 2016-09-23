@@ -19,3 +19,7 @@ export const RESET_FOCUS = "RESET_FOCUS";
 export const NOT_FOUND = "NOT_FOUND";
 export const LOAD_ERROR = "LOAD_ERROR";
 export const RESET_PAGE_STATE = "RESET_PAGE_STATE";
+
+// We don't want loosing comment by user then sending error
+// happens. So handle this situation in a special way.
+export const SEND_COMMENT_ERROR = "SEND_COMMENT_ERROR";

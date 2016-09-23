@@ -115,6 +115,10 @@ textarea.error, input.error {
     box-shadow: 0 0 3px red;
 }
 
+span.error {
+    color: red;
+}
+
 .postPreview {
     margin-bottom: 40px;
 }

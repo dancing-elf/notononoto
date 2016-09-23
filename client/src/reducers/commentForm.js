@@ -8,7 +8,8 @@ import {
     UPDATE_COMMENT,
     CLEAN_COMMENT_FORM,
     COMMENT_INVALID,
-    RESET_FOCUS
+    RESET_FOCUS,
+    SEND_COMMENT_ERROR
 } from "../actions/ActionTypes";
 
 // Constants for using with focusInput property
@@ -27,8 +28,10 @@ const initialState = {
 
     commentValue: "",
     commentHasError: false,
-
+    // Current element with focus
     focusInput: USER_DEFINED,
+    // When sending a message errors occurred
+    isSendOk: true
 };
 
 /**
@@ -65,17 +68,25 @@ export function commentForm(state = initialState, action) {
                 authorHasError: action.authorHasError,
                 emailHasError: action.emailHasError,
                 commentHasError: action.commentHasError,
-                focusInput: action.focusInput
+                focusInput: action.focusInput,
+                isSendOk: true
             });
         case RESET_FOCUS:
             return copy(state, {focusInput: USER_DEFINED});
+        case SEND_COMMENT_ERROR:
+            return copy(state, {
+                authorHasError: false,
+                emailHasError: false,
+                commentHasError: false,
+                isSendOk: false
+            });
         default:
             return state;
     }
 }
 
 /**
- * @param state global redux state
+ * @param state global Redux state
  * @returns {object} state of comment form
  */
 export function getCommentFormState(state) {

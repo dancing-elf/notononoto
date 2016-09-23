@@ -89,6 +89,7 @@ export class CommentForm extends Component {
             </div>
             <div>
                 <input type="submit" value="コメントを送信"/>
+                <span className="error">{this.props.isSendOk ? "" : "エラー"}</span>
             </div>
         </form>;
     }
@@ -102,6 +103,7 @@ CommentForm.propTypes = {
     updateEmail: PropTypes.func.isRequired,
     updateComment: PropTypes.func.isRequired,
     resetAutoFocus: PropTypes.func.isRequired,
+    resetCommentFormState: PropTypes.func.isRequired,
 
     authorValue: PropTypes.string.isRequired,
     authorHasError: PropTypes.bool.isRequired,
@@ -112,7 +114,8 @@ CommentForm.propTypes = {
     commentValue: PropTypes.string.isRequired,
     commentHasError: PropTypes.bool.isRequired,
 
-    focusInput: PropTypes.string
+    focusInput: PropTypes.string.isRequired,
+    isSendOk: PropTypes.bool.isRequired,
 };
 
 function mapStateToProps(state) {

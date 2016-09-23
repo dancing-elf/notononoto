@@ -3,7 +3,7 @@ import {NOT_FOUND, LOAD_ERROR, RESET_PAGE_STATE} from "./ActionTypes";
 /**
  * @returns {object} reset page state
  */
-export function createPageStateAction() {
+export function createResetPageStateAction() {
     return {type: RESET_PAGE_STATE};
 }
 

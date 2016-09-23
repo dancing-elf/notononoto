@@ -8,6 +8,7 @@ import {
     UPDATE_COMMENT,
     CLEAN_COMMENT_FORM,
     COMMENT_INVALID,
+    SEND_COMMENT_ERROR,
     RESET_FOCUS
 } from "../actions/ActionTypes";
 import {
@@ -126,8 +127,8 @@ function addNewComment(postId, author, email, comment, dispatch) {
     }).then(function (response) {
         dispatch(createUpdateCommentsAction(response.data));
         dispatch({type: CLEAN_COMMENT_FORM});
-    }).catch(function (error) {
-        console.log(error);
+    }).catch(function () {
+        dispatch({type: SEND_COMMENT_ERROR});
     });
 }
 
