@@ -1,15 +1,41 @@
-import {NOT_FOUND, LOAD_ERROR} from "./ActionTypes";
+import {NOT_FOUND, LOAD_ERROR, RESET_PAGE_STATE} from "./ActionTypes";
+
+/**
+ * @returns {object} reset page state
+ */
+export function createPageStateAction() {
+    return {type: RESET_PAGE_STATE};
+}
+
+/**
+ * Handle axios error
+ * @param dispatch Redux dispatch
+ * @param error axios error
+ */
+export function handleError(dispatch, error) {
+    if (error.response) {
+        if (error.response.status === 404) {
+            dispatch(createNotFoundAction());
+        } else {
+            dispatch(createLoadErrorAction(
+                error.response.status + ": " +
+                error.response.statusText));
+        }
+    } else {
+        dispatch(createLoadErrorAction(error.message));
+    }
+}
 
 /**
  * @returns {object} action to display "not found" message
  */
-export function createNotFoundAction() {
+function createNotFoundAction() {
     return {type: NOT_FOUND};
 }
 
 /**
  * @returns {object} action to display error
  */
-export function createLoadErrorAction(message) {
+function createLoadErrorAction(message) {
     return {type: LOAD_ERROR, message: message};
 }

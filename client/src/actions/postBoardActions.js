@@ -1,5 +1,6 @@
 import axios from "axios";
-import {LOAD_POSTS} from "../actions/ActionTypes";
+import {LOAD_POSTS} from "./ActionTypes";
+import {handleError} from "./pageActions";
 
 /**
  * @param dispatch Redux dispatch
@@ -12,7 +13,7 @@ export function createLoadPostsFunction(dispatch) {
                 dispatch({type: LOAD_POSTS, posts: response.data});
             })
             .catch(function (error) {
-                console.log(error);
+                handleError(dispatch, error);
             });
     };
 }

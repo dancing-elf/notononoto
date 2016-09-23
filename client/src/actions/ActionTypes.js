@@ -18,3 +18,4 @@ export const RESET_FOCUS = "RESET_FOCUS";
 // Page load errors
 export const NOT_FOUND = "NOT_FOUND";
 export const LOAD_ERROR = "LOAD_ERROR";
+export const RESET_PAGE_STATE = "RESET_PAGE_STATE";
