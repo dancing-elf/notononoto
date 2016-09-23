@@ -14,3 +14,7 @@ export const COMMENT_INVALID = "COMMENT_INVALID";
 export const REPLY_COMMENT = "REPLY_COMMENT";
 export const QUOTE_COMMENT = "QUOTE_COMMENT";
 export const RESET_FOCUS = "RESET_FOCUS";
+
+// Page load errors
+export const NOT_FOUND = "NOT_FOUND";
+export const LOAD_ERROR = "LOAD_ERROR";

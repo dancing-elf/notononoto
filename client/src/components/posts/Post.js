@@ -17,6 +17,10 @@ export class Post extends Component {
         this.props.loadPost(this.props.params.postId);
     }
     render() {
+        if (!this.props.post.timestamp) {
+            // the data has not yet been loaded
+            return <div></div>;
+        }
         return <div>
             <Article post={this.props.post}/>
             <CommentsTree comments={this.props.comments}/>

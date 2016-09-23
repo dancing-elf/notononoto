@@ -7,9 +7,6 @@ import {formatDate} from "../../util/util";
 export default class Article extends Component {
     render() {
         const post = this.props.post;
-        if (!post.timestamp) {
-            return <div></div>;
-        }
         return <div>
             <div className="dateTime">
                 {formatDate(post.timestamp)}

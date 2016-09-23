@@ -4,7 +4,7 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 import akka.http.scaladsl.model.headers._
-import akka.http.scaladsl.model.{ContentTypes, HttpEntity, HttpResponse}
+import akka.http.scaladsl.model.{ContentTypes, HttpEntity, HttpResponse, StatusCodes}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import com.notononoto.storage.{Comment, Post, StorageStub}
@@ -43,11 +43,6 @@ object RouteFactory {
     * @param webRoot directory with frontend's content
     */
   def createRoute(webRoot: String): Route = {
-
-    // Only existed postId can be handled
-    val IntNumberExists = IntNumber
-      .flatMap(id => if (isPostExists(id)) Some(id) else None)
-
     respondWithHeaders(
       `Access-Control-Allow-Origin`.*,
       `Cache-Control`(CacheDirectives.`no-cache`)) {
@@ -56,9 +51,13 @@ object RouteFactory {
           path("posts") {
             complete(jsonResponse(StorageStub.loadPosts().toJson))
           } ~
-          path("post" / IntNumberExists) { postId =>
-            val (post, comments) = StorageStub.loadPost(postId)
-            complete(jsonResponse(PostData(post, comments).toJson))
+          path("post" / Segment) { str =>
+            if (!isPostExists(str)) {
+              complete((StatusCodes.NotFound, "Resource not found"))
+            } else {
+              val (post, comments) = StorageStub.loadPost(str.toInt)
+              complete(jsonResponse(PostData(post, comments).toJson))
+            }
           }
         } ~
         post {
@@ -90,8 +89,21 @@ object RouteFactory {
     obj.fields(name).convertTo[String]
   }
 
-  private def isPostExists(id: Integer): Boolean = {
+  private def isPostExists(str: String): Boolean = {
+    if (!isInt(str)) {
+      return false
+    }
+    val id = str.toInt
     id > 0 && id < StorageStub.getPostCount
+  }
+
+  private def isInt(str: String): Boolean = {
+    try {
+      str.toInt
+      true
+    } catch {
+      case _: Exception => false
+    }
   }
 
   private def jsonResponse(json: JsValue): HttpResponse = {

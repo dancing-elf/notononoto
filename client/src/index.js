@@ -8,6 +8,7 @@ import CommonLayout from "./components/common/CommonLayout";
 import PostBoard from "./components/index/PostBoard";
 import Post from "./components/posts/Post";
 import About from "./components/about/About";
+import NotFoundError from "./components/errors/NotFoundError";
 import configureStore from "./store/configureStore";
 
 
@@ -20,6 +21,7 @@ ReactDOM.render(
                 <IndexRoute component={PostBoard}/>
                 <Route path="posts/:postId" component={Post}/>
                 <Route path="about" component={About}/>
+                <Route path="*" component={NotFoundError}/>
             </Route>
         </Router>
     </Provider>,

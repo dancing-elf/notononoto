@@ -1,6 +1,7 @@
 import axios from "axios";
 
-import {LOAD_POST, UPDATE_COMMENTS} from "../actions/ActionTypes";
+import {LOAD_POST, UPDATE_COMMENTS} from "./ActionTypes";
+import {createLoadErrorAction, createNotFoundAction} from "./pageActions";
 
 /**
  * @param dispatch Redux dispatch
@@ -18,7 +19,17 @@ export function createLoadPostFunction(dispatch) {
                 });
             })
             .catch(function (error) {
-                console.log(error);
+                if (error.response) {
+                    if (error.response.status === 404) {
+                        dispatch(createNotFoundAction());
+                    } else {
+                        dispatch(createLoadErrorAction(
+                            error.response.status + ": " +
+                            error.response.statusText));
+                    }
+                } else {
+                    dispatch(createLoadErrorAction(error.message));
+                }
             });
     };
 }
