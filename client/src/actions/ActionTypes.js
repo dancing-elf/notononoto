@@ -23,3 +23,8 @@ export const RESET_PAGE_STATE = "RESET_PAGE_STATE";
 // We don't want loosing comment by user then sending error
 // happens. So handle this situation in a special way.
 export const SEND_COMMENT_ERROR = "SEND_COMMENT_ERROR";
+
+// Admin login actins
+export const UPDATE_LOGIN = "UPDATE_LOGIN";
+export const UPDATE_PASSWORD = "UPDATE_PASSWORD";
+export const ERROR_LOGIN = "ERROR_LOGIN";

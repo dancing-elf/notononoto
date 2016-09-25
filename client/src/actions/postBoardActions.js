@@ -8,7 +8,7 @@ import {handleError} from "./pageActions";
  */
 export function createLoadPostsFunction(dispatch) {
     return () => {
-        axios.get("/api/posts")
+        axios.get("/api/public/posts")
             .then(function (response) {
                 dispatch({type: LOAD_POSTS, posts: response.data});
             })

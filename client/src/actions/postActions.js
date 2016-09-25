@@ -9,7 +9,7 @@ import {handleError} from "./pageActions";
  */
 export function createLoadPostFunction(dispatch) {
     return (postId) => {
-        axios.get("/api/post/" + postId)
+        axios.get("/api/public/post/" + postId)
             .then(function (response) {
                 dispatch({
                     type: LOAD_POST,

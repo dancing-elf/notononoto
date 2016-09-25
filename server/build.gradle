@@ -10,10 +10,14 @@ ext {
 }
 
 dependencies {
+
     compile "org.scala-lang:scala-library:$scalaVersion"
     compile "com.typesafe.akka:akka-http-core_2.11:$akkaVersion"
     compile "com.typesafe.akka:akka-http-experimental_2.11:$akkaVersion"
     compile "com.typesafe.akka:akka-http-spray-json-experimental_2.11:$akkaVersion"
+    compile "ch.qos.logback:logback-classic:1.1.7"
+    compile "com.typesafe.scala-logging:scala-logging_2.11:3.4.0"
+
     testCompile "junit:junit:4.12"
     testCompile "org.scalatest:scalatest_2.11:3.0.0"
     testCompile "com.typesafe.akka:akka-http-testkit_2.11:$akkaVersion"

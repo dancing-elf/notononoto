@@ -119,7 +119,7 @@ function createCommentInvalidAction(authorHasError,
  * Send comment form's data to server and handle result
  */
 function addNewComment(postId, author, email, comment, dispatch) {
-    axios.post("/api/new_comment", {
+    axios.post("/api/public/new_comment", {
         postId: postId,
         author: author,
         email: email,

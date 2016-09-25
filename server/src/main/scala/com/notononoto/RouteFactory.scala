@@ -6,14 +6,19 @@ import java.time.format.DateTimeFormatter
 import akka.http.scaladsl.model.headers._
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity, HttpResponse, StatusCodes}
 import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.Route
+import akka.http.scaladsl.server.{RejectionHandler, Route}
 import com.notononoto.storage.{Comment, Post, StorageStub}
 import spray.json._
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+import akka.http.scaladsl.server.directives.Credentials
+import com.typesafe.scalalogging.Logger
+import org.slf4j.LoggerFactory
 
 
 /** Factory for application routing */
 object RouteFactory {
+
+  private val log = Logger(LoggerFactory.getLogger(this.getClass))
 
   /** Information about post */
   final case class PostData(post: Post, comments: List[Comment])
@@ -38,44 +43,71 @@ object RouteFactory {
   }
   import JsonProtocol._
 
+  /** Check admin password */
+  def passAuthenticator(credentials: Credentials): Option[String] =
+    credentials match {
+      case p @ Credentials.Provided(id)
+        if id == "admin" && p.verify("admin") => Some(id)
+      case _ => None
+    }
+
   /**
     * Create web route
     * @param webRoot directory with frontend's content
     */
   def createRoute(webRoot: String): Route = {
-    respondWithHeaders(
-      `Access-Control-Allow-Origin`.*,
-      `Cache-Control`(CacheDirectives.`no-cache`)) {
-      pathPrefix("api") {
-        get {
-          path("posts") {
-            complete(jsonResponse(StorageStub.loadPosts().toJson))
-          } ~
-          path("post" / Segment) { str =>
-            if (!isPostExists(str)) {
-              complete((StatusCodes.NotFound, "Resource not found"))
-            } else {
-              val (post, comments) = StorageStub.loadPost(str.toInt)
-              complete(jsonResponse(PostData(post, comments).toJson))
+
+    // Only existed postId can be handled
+    val IntNumberExists = IntNumber
+      .flatMap(id => if (isPostExists(id)) Some(id) else None)
+
+    pathPrefix("api") {
+      respondWithHeaders(
+        `Access-Control-Allow-Origin`.*,
+        `Cache-Control`(CacheDirectives.`no-cache`)) {
+        handleRejections(RejectionHandler.default) {
+          pathPrefix("public") {
+            get {
+              path("posts") {
+                complete(jsonResponse(StorageStub.loadPosts().toJson))
+              } ~
+                path("post" / IntNumberExists) { postId =>
+                  val (post, comments) = StorageStub.loadPost(postId)
+                  complete(jsonResponse(PostData(post, comments).toJson))
+                }
+            } ~
+            post {
+              (path("new_comment") & entity(as[JsValue])) {
+                (json) => {
+                  val obj = json.asJsObject
+                  val postIdLong = jsonField(obj, "postId").toLong
+                  StorageStub.addComment(postIdLong, jsonField(obj, "author"),
+                    jsonField(obj, "email"), jsonField(obj, "text"))
+                  val comments = StorageStub.loadComments(postIdLong)
+                  complete(jsonResponse(comments.toJson))
+                }
+              }
             }
-          }
-        } ~
-        post {
-          (path("new_comment") & entity(as[JsValue])) {
-            (json) => {
-              val obj = json.asJsObject
-              val postIdLong = jsonField(obj, "postId").toLong
-              StorageStub.addComment(postIdLong, jsonField(obj, "author"),
-                jsonField(obj, "email"), jsonField(obj, "text"))
-              val comments = StorageStub.loadComments(postIdLong)
-              complete(jsonResponse(comments.toJson))
+          } ~
+          pathPrefix("admin") {
+            authenticateBasic(realm = "admin part", passAuthenticator) { user =>
+              get {
+                path("login") {
+                  log.debug("success")
+                  complete("Success")
+                } ~
+                  path("posts") {
+                    log.debug("request received")
+                    complete(jsonResponse(StorageStub.loadPosts().toJson))
+                  }
+              }
             }
           }
         }
       }
     } ~
     (get & path("bundle.js")) {
-      getFromFile(webRoot + "/bundle.js")
+      getFromFile(webRoot + "/public.js")
     } ~
     (get & path("favicon.png")) {
       getFromFile(webRoot + "/favicon.png")
@@ -89,21 +121,8 @@ object RouteFactory {
     obj.fields(name).convertTo[String]
   }
 
-  private def isPostExists(str: String): Boolean = {
-    if (!isInt(str)) {
-      return false
-    }
-    val id = str.toInt
+  private def isPostExists(id: Integer): Boolean = {
     id > 0 && id < StorageStub.getPostCount
-  }
-
-  private def isInt(str: String): Boolean = {
-    try {
-      str.toInt
-      true
-    } catch {
-      case _: Exception => false
-    }
   }
 
   private def jsonResponse(json: JsValue): HttpResponse = {

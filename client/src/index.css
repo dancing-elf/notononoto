@@ -115,10 +115,32 @@ textarea.error, input.error {
     box-shadow: 0 0 3px red;
 }
 
-span.error {
+span.error, div.error {
     color: red;
 }
 
 .postPreview {
     margin-bottom: 40px;
+}
+
+#loginForm {
+    background-color: gainsboro;
+    width: 400px;
+    height: 250px;
+
+    position: absolute;
+    top:0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+
+    margin: auto;
+}
+
+#loginInputs {
+    margin-left: 75px;
+}
+
+#loginInputs div, #loginInputs input {
+    margin-top: 5px;
 }
