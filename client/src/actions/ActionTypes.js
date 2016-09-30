@@ -27,4 +27,5 @@ export const SEND_COMMENT_ERROR = "SEND_COMMENT_ERROR";
 // Admin login actins
 export const UPDATE_LOGIN = "UPDATE_LOGIN";
 export const UPDATE_PASSWORD = "UPDATE_PASSWORD";
-export const ERROR_LOGIN = "ERROR_LOGIN";
+export const SIGN_IN = "SIGN_IN";
+export const FAIL_SIGN_IN = "FAIL_SIGN_IN";

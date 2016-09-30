@@ -3,7 +3,7 @@ import {page} from "./page";
 import {postBoard} from "./postBoard";
 import {post} from "./post";
 import {commentForm} from "./commentForm";
-import {login} from "./login";
+import {auth} from "./auth";
 
 import {RESET_PAGE_STATE} from "../actions/ActionTypes";
 
@@ -14,7 +14,7 @@ const appReducer = combineReducers({
     post,
     commentForm,
 
-    login
+    auth
 });
 
 /** We need opportunity to reset state of Redux */

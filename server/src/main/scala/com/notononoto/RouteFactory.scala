@@ -4,7 +4,7 @@ import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 import akka.http.scaladsl.model.headers._
-import akka.http.scaladsl.model.{ContentTypes, HttpEntity, HttpResponse, StatusCodes}
+import akka.http.scaladsl.model.{ContentTypes, HttpEntity, HttpResponse}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.{RejectionHandler, Route}
 import com.notononoto.storage.{Comment, Post, StorageStub}

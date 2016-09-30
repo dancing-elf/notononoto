@@ -1,5 +1,4 @@
 import React, {PropTypes, Component} from "react";
-import {Link} from "react-router";
 import {connect} from "react-redux";
 
 import {
@@ -8,13 +7,17 @@ import {
     NOT_FOUND_STATE,
     LOAD_ERROR_STATE
 } from "../../reducers/page";
+import {getAuthState} from "../../reducers/auth";
 
 import NotFoundError from "../errors/NotFoundError";
 import LoadError from "../errors/LoadError";
 
+import Login from "./Login";
+import ControlPanel from "./ControlPanel";
+
 
 /** Common layout of all pages */
-export class CommonLayout extends Component {
+export class Admin extends Component {
     /**
      * Error handling
      * @returns {XML} return childrens in no errors happens or
@@ -22,8 +25,13 @@ export class CommonLayout extends Component {
      */
     getContent() {
         switch (this.props.state) {
-            case OK_STATE:
-                return this.props.children;
+            case OK_STATE: {
+                if (!this.props.isLogged) {
+                    return <Login/>;
+                } else {
+                    return <ControlPanel/>;
+                }
+            }
             case NOT_FOUND_STATE:
                 return <NotFoundError/>;
             case LOAD_ERROR_STATE:
@@ -33,34 +41,31 @@ export class CommonLayout extends Component {
         }
     }
     render() {
-        return <div id="common-layout-root">
+        return <div className="admin" id="common-layout-root">
             <div id="header">
-                Notononoto blog
+                Notononoto admin panel
             </div>
             <div id="content">
                 {this.getContent()}
-            </div>
-            <div id="footer">
-                <div>
-                    <Link to={"/about"}>ブログの概要</Link>
-                </div>
             </div>
         </div>;
     }
 }
 
-CommonLayout.propTypes = {
+Admin.propTypes = {
     state: PropTypes.string.isRequired,
     message: PropTypes.string,
-    children: PropTypes.node.isRequired
+    isLogged: PropTypes.bool.isRequired
 };
 
 const mapStateToProps = (state) => {
     const pageState = getPageState(state);
+    const authState = getAuthState(state);
     return {
         state: pageState.state,
-        message: pageState.message
+        message: pageState.message,
+        isLogged: authState.isLogged
     };
 };
 
-export default connect(mapStateToProps)(CommonLayout);
+export default connect(mapStateToProps)(Admin);

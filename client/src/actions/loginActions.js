@@ -1,13 +1,13 @@
 import axios from "axios";
-import {browserHistory} from "react-router";
 
 import {
     UPDATE_LOGIN,
     UPDATE_PASSWORD,
-    ERROR_LOGIN
+    SIGN_IN,
+    FAIL_SIGN_IN
 } from "../actions/ActionTypes";
 
-import {getLoginState} from "../reducers/login";
+import {getAuthState} from "../reducers/auth";
 
 /**
  * @param dispatch Redux dispatch method
@@ -30,9 +30,9 @@ export function createUpdatePasswordFunction(dispatch) {
  */
 export function submitLogin() {
     return (dispatch, getState) => {
-        const loginState = getLoginState(getState());
-        const login = loginState.loginValue.trim();
-        const password = loginState.passwordValue.trim();
+        const authState = getAuthState(getState());
+        const login = authState.login.trim();
+        const password = authState.password.trim();
 
         axios.get("/api/admin/login", {
             auth: {
@@ -40,9 +40,9 @@ export function submitLogin() {
                 password: password
             }
         }).then(function () {
-            browserHistory.push("/admin/control_panel");
+            dispatch({type: SIGN_IN});
         }).catch(function () {
-            dispatch({type: ERROR_LOGIN});
+            dispatch({type: FAIL_SIGN_IN});
         });
     };
 }

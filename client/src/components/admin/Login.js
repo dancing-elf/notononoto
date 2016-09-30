@@ -1,7 +1,7 @@
 import React, {Component, PropTypes} from "react";
 import {connect} from "react-redux";
 
-import {getLoginState} from "../../reducers/login";
+import {getAuthState} from "../../reducers/auth";
 import {
     createUpdateLoginFunction,
     createUpdatePasswordFunction,
@@ -25,24 +25,22 @@ class Login extends Component {
         return <form id="loginForm"
                      noValidate
                      onSubmit={this.handleSubmit.bind(this)}>
-            <div id="loginInputs">
-                <div>
-                    <div className="label">Login</div>
-                    <input type="text"
-                           onChange={this.handleLoginChange.bind(this)}
-                           value={this.props.loginValue}/>
-                </div>
-                <div>
-                    <div className="label">Password</div>
-                    <input type="password"
-                           onChange={this.handlePasswordChange.bind(this)}
-                           value={this.props.passwordValue}/>
-                </div>
-                <div>
-                    <input type="submit" value="Enter"/>
-                    <div className="error">
-                        {this.props.isLoginOk ? "" : "Login or password is incorrect"}
-                    </div>
+            <div>
+                <div>Login</div>
+                <input type="text"
+                       onChange={this.handleLoginChange.bind(this)}
+                       value={this.props.login}/>
+            </div>
+            <div>
+                <div>Password</div>
+                <input type="password"
+                       onChange={this.handlePasswordChange.bind(this)}
+                       value={this.props.password}/>
+            </div>
+            <div>
+                <input type="submit" value="Sign In"/>
+                <div className="error">
+                    {this.props.hasError ? "Login or password is incorrect" : ""}
                 </div>
             </div>
         </form>;
@@ -54,17 +52,17 @@ Login.propTypes = {
     updatePassword: PropTypes.func.isRequired,
     submit: PropTypes.func.isRequired,
 
-    loginValue: PropTypes.string.isRequired,
-    passwordValue: PropTypes.string.isRequired,
-    isLoginOk: PropTypes.bool.isRequired
+    login: PropTypes.string.isRequired,
+    password: PropTypes.string.isRequired,
+    hasError: PropTypes.bool.isRequired
 };
 
 const mapStateToProps = (state) => {
-    const loginState = getLoginState(state);
+    const authState = getAuthState(state);
     return {
-        loginValue: loginState.loginValue,
-        passwordValue: loginState.passwordValue,
-        isLoginOk: loginState.isLoginOk
+        login: authState.login,
+        password: authState.password,
+        hasError: authState.hasError
     };
 };
 

@@ -123,24 +123,13 @@ span.error, div.error {
     margin-bottom: 40px;
 }
 
-#loginForm {
-    background-color: gainsboro;
-    width: 400px;
-    height: 250px;
 
-    position: absolute;
-    top:0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-
-    margin: auto;
+/** Redefine colors for admin panel */
+.admin #header {
+    color: firebrick;
+    border-bottom: solid 5px firebrick;
 }
 
-#loginInputs {
-    margin-left: 75px;
-}
-
-#loginInputs div, #loginInputs input {
-    margin-top: 5px;
+.admin a {
+    color: firebrick;
 }
