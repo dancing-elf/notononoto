@@ -1,5 +1,5 @@
 import axios from "axios";
-import {LOAD_POSTS} from "./ActionTypes";
+import {LOAD_POSTS} from "../ActionTypes";
 import {handleError} from "./pageActions";
 
 /**

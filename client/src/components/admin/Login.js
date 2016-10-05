@@ -1,12 +1,12 @@
 import React, {Component, PropTypes} from "react";
 import {connect} from "react-redux";
 
-import {getAuthState} from "../../reducers/auth";
+import {getAuthState} from "../../reducers/admin/auth";
 import {
     createUpdateLoginFunction,
     createUpdatePasswordFunction,
     submitLogin
-} from "../../actions/loginActions";
+} from "../../actions/admin/loginActions";
 
 
 /** Login page for admin part of application */

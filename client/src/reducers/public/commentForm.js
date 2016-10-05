@@ -1,4 +1,4 @@
-import {copy} from "../util/util";
+import {copy} from "../../util/util";
 
 import {
     REPLY_COMMENT,
@@ -10,7 +10,7 @@ import {
     COMMENT_INVALID,
     RESET_FOCUS,
     SEND_COMMENT_ERROR
-} from "../actions/ActionTypes";
+} from "../../actions/ActionTypes";
 
 // Constants for using with focusInput property
 export const AUTHOR_INPUT = "AUTHOR_INPUT";

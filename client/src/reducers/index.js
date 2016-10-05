@@ -1,9 +1,13 @@
 import {combineReducers} from "redux";
-import {page} from "./page";
-import {postBoard} from "./postBoard";
-import {post} from "./post";
-import {commentForm} from "./commentForm";
-import {auth} from "./auth";
+import {page} from "./public/page";
+import {postBoard} from "./public/postBoard";
+import {post} from "./public/post";
+import {commentForm} from "./public/commentForm";
+
+import {auth} from "./admin/auth";
+import {admin} from "./admin/admin";
+import {postsList} from "./admin/postsList";
+import {postData} from "./admin/postData";
 
 import {RESET_PAGE_STATE} from "../actions/ActionTypes";
 
@@ -14,7 +18,10 @@ const appReducer = combineReducers({
     post,
     commentForm,
 
-    auth
+    auth,
+    admin,
+    postsList,
+    postData
 });
 
 /** We need opportunity to reset state of Redux */

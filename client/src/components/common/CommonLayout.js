@@ -7,10 +7,10 @@ import {
     OK_STATE,
     NOT_FOUND_STATE,
     LOAD_ERROR_STATE
-} from "../../reducers/page";
+} from "../../reducers/public/page";
 
-import NotFoundError from "../errors/NotFoundError";
-import LoadError from "../errors/LoadError";
+import NotFoundError from "./NotFoundError";
+import LoadError from "./LoadError";
 
 
 /** Common layout of all pages */

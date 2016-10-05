@@ -4,10 +4,11 @@ import {
     UPDATE_LOGIN,
     UPDATE_PASSWORD,
     SIGN_IN,
-    FAIL_SIGN_IN
-} from "../actions/ActionTypes";
+    FAIL_SIGN_IN,
+    OPEN_POSTS_LIST
+} from "../ActionTypes";
 
-import {getAuthState} from "../reducers/auth";
+import {getAuthState} from "../../reducers/admin/auth";
 
 /**
  * @param dispatch Redux dispatch method
@@ -41,6 +42,7 @@ export function submitLogin() {
             }
         }).then(function () {
             dispatch({type: SIGN_IN});
+            dispatch({type: OPEN_POSTS_LIST});
         }).catch(function () {
             dispatch({type: FAIL_SIGN_IN});
         });

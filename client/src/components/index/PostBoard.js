@@ -2,8 +2,8 @@ import React, {Component, PropTypes} from "react";
 import {connect} from "react-redux";
 import {Link} from "react-router";
 
-import {getPosts} from "../../reducers/postBoard";
-import {createLoadPostsFunction} from "../../actions/postBoardActions";
+import {getPosts} from "../../reducers/public/postBoard";
+import {createLoadPostsFunction} from "../../actions/public/postBoardActions";
 import {formatDate} from "../../util/util";
 
 

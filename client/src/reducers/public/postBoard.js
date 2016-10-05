@@ -1,5 +1,5 @@
-import {copy} from "../util/util";
-import {LOAD_POSTS} from "../actions/ActionTypes";
+import {copy} from "../../util/util";
+import {LOAD_POSTS} from "../../actions/ActionTypes";
 
 const initialState = { posts: [] };
 

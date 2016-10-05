@@ -10,14 +10,14 @@ import {
     COMMENT_INVALID,
     SEND_COMMENT_ERROR,
     RESET_FOCUS
-} from "../actions/ActionTypes";
+} from "../ActionTypes";
 import {
     AUTHOR_INPUT,
     EMAIL_INPUT,
     COMMENT_INPUT,
-} from "../reducers/commentForm";
+} from "../../reducers/public/commentForm";
 
-import {getPostIdState} from "../reducers/post";
+import {getPostIdState} from "../../reducers/public/post";
 import {createUpdateCommentsAction} from "./postActions";
 
 /**

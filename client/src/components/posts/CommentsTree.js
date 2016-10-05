@@ -5,7 +5,7 @@ import {formatDate} from "../../util/util";
 import {
     createAnswerFunction,
     createQuoteFunction
-} from "../../actions/commentFormActions";
+} from "../../actions/public/commentFormActions";
 
 
 /** Post's comments */

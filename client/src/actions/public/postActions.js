@@ -1,6 +1,6 @@
 import axios from "axios";
 
-import {LOAD_POST, UPDATE_COMMENTS} from "./ActionTypes";
+import {LOAD_POST, UPDATE_COMMENTS} from "../ActionTypes";
 import {handleError} from "./pageActions";
 
 /**

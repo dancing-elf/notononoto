@@ -1,4 +1,4 @@
-import {NOT_FOUND, LOAD_ERROR, RESET_PAGE_STATE} from "./ActionTypes";
+import {NOT_FOUND, LOAD_ERROR, RESET_PAGE_STATE} from "../ActionTypes";
 
 /**
  * @returns {object} reset page state

@@ -6,11 +6,11 @@ import {
     OK_STATE,
     NOT_FOUND_STATE,
     LOAD_ERROR_STATE
-} from "../../reducers/page";
-import {getAuthState} from "../../reducers/auth";
+} from "../../reducers/public/page";
+import {getAuthState} from "../../reducers/admin/auth";
 
-import NotFoundError from "../errors/NotFoundError";
-import LoadError from "../errors/LoadError";
+import NotFoundError from "../common/NotFoundError";
+import LoadError from "../common/LoadError";
 
 import Login from "./Login";
 import ControlPanel from "./ControlPanel";

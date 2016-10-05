@@ -7,8 +7,8 @@ import CommentForm from "./CommentForm";
 import {
     getPostState,
     getCommentsState
-} from "../../reducers/post";
-import {createLoadPostFunction} from "../../actions/postActions";
+} from "../../reducers/public/post";
+import {createLoadPostFunction} from "../../actions/public/postActions";
 
 
 /** Post description */

@@ -1,8 +1,8 @@
-import {copy} from "../util/util";
+import {copy} from "../../util/util";
 import {
     NOT_FOUND,
     LOAD_ERROR,
-} from "../actions/ActionTypes";
+} from "../../actions/ActionTypes";
 
 export const OK_STATE = "OK_STATE";
 export const NOT_FOUND_STATE = "NOT_FOUND_STATE";

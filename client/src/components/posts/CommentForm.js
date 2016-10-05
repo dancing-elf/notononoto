@@ -1,21 +1,21 @@
 import React, {PropTypes, Component} from "react";
 import {connect} from "react-redux";
 
-import {getPostIdState} from "../../reducers/post";
+import {getPostIdState} from "../../reducers/public/post";
 import {
     AUTHOR_INPUT,
     EMAIL_INPUT,
     COMMENT_INPUT,
     USER_DEFINED,
     getCommentFormState,
-} from "../../reducers/commentForm";
+} from "../../reducers/public/commentForm";
 import {
     createSubmitCommentAction,
     createUpdateAuthorFunction,
     createUpdateCommentFunction,
     createUpdateEmailFunction,
     createResetFocusFunction
-} from "../../actions/commentFormActions";
+} from "../../actions/public/commentFormActions";
 
 
 /** Form for user's comment input */

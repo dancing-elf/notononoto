@@ -1,5 +1,5 @@
-import {copy} from "../util/util";
-import {LOAD_POST, UPDATE_COMMENTS} from "../actions/ActionTypes";
+import {copy} from "../../util/util";
+import {LOAD_POST, UPDATE_COMMENTS} from "../../actions/ActionTypes";
 
 const initialState = {
     postId: "",

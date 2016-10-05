@@ -9,11 +9,11 @@ import CommonLayout from "./components/common/CommonLayout";
 import PostBoard from "./components/index/PostBoard";
 import Post from "./components/posts/Post";
 import About from "./components/about/About";
-import NotFoundError from "./components/errors/NotFoundError";
+import NotFoundError from "./components/common/NotFoundError";
 
 import Admin from "./components/admin/Admin";
 
-import {createResetPageStateAction} from "./actions/pageActions";
+import {createResetPageStateAction} from "./actions/public/pageActions";
 import configureStore from "./store/configureStore";
 
 

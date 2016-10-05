@@ -1,11 +1,11 @@
-import {copy} from "../util/util";
+import {copy} from "../../util/util";
 
 import {
     UPDATE_LOGIN,
     UPDATE_PASSWORD,
     FAIL_SIGN_IN,
     SIGN_IN
-} from "../actions/ActionTypes";
+} from "../../actions/ActionTypes";
 
 
 const initialState = {

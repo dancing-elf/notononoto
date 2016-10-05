@@ -24,8 +24,13 @@ export const RESET_PAGE_STATE = "RESET_PAGE_STATE";
 // happens. So handle this situation in a special way.
 export const SEND_COMMENT_ERROR = "SEND_COMMENT_ERROR";
 
-// Admin login actins
+// Admin login actions
 export const UPDATE_LOGIN = "UPDATE_LOGIN";
 export const UPDATE_PASSWORD = "UPDATE_PASSWORD";
 export const SIGN_IN = "SIGN_IN";
 export const FAIL_SIGN_IN = "FAIL_SIGN_IN";
+
+// PostsList actions
+export const LOAD_POSTS_DESC = "LOAD_POSTS_DESC";
+export const OPEN_POST = "OPEN_POST";
+export const OPEN_POSTS_LIST = "OPEN_POSTS_LIST";

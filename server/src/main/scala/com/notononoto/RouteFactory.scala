@@ -71,10 +71,10 @@ object RouteFactory {
               path("posts") {
                 complete(jsonResponse(StorageStub.loadPosts().toJson))
               } ~
-                path("post" / IntNumberExists) { postId =>
-                  val (post, comments) = StorageStub.loadPost(postId)
-                  complete(jsonResponse(PostData(post, comments).toJson))
-                }
+              path("post" / IntNumberExists) { postId =>
+                val (post, comments) = StorageStub.loadPost(postId)
+                complete(jsonResponse(PostData(post, comments).toJson))
+              }
             } ~
             post {
               (path("new_comment") & entity(as[JsValue])) {
@@ -96,10 +96,14 @@ object RouteFactory {
                   log.debug("success")
                   complete("Success")
                 } ~
-                  path("posts") {
-                    log.debug("request received")
-                    complete(jsonResponse(StorageStub.loadPosts().toJson))
-                  }
+                path("posts") {
+                  log.debug("request received")
+                  complete(jsonResponse(StorageStub.loadPosts().toJson))
+                } ~
+                path("post" / IntNumberExists) { postId =>
+                  val (post, comments) = StorageStub.loadPost(postId)
+                  complete(jsonResponse(PostData(post, comments).toJson))
+                }
               }
             }
           }
