@@ -119,6 +119,10 @@ span.error, div.error {
     color: red;
 }
 
+div.success {
+    color: green;
+}
+
 .postPreview {
     margin-bottom: 40px;
 }
@@ -132,4 +136,9 @@ span.error, div.error {
 
 .admin a {
     color: firebrick;
+}
+
+.boxTitle {
+    font-size: 18px;
+    font-weight: bolder;
 }

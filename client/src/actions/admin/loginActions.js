@@ -27,6 +27,13 @@ export function createUpdatePasswordFunction(dispatch) {
 }
 
 /**
+ * @returns {*} open post list action
+ */
+export function createOpenPostsListAction() {
+    return {type: OPEN_POSTS_LIST};
+}
+
+/**
  * Submit login and password
  */
 export function submitLogin() {
@@ -42,7 +49,7 @@ export function submitLogin() {
             }
         }).then(function () {
             dispatch({type: SIGN_IN});
-            dispatch({type: OPEN_POSTS_LIST});
+            dispatch(createOpenPostsListAction());
         }).catch(function () {
             dispatch({type: FAIL_SIGN_IN});
         });

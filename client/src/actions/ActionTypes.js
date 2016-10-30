@@ -34,3 +34,9 @@ export const FAIL_SIGN_IN = "FAIL_SIGN_IN";
 export const LOAD_POSTS_DESC = "LOAD_POSTS_DESC";
 export const OPEN_POST = "OPEN_POST";
 export const OPEN_POSTS_LIST = "OPEN_POSTS_LIST";
+
+// PostData actions
+export const UPDATE_HEADER = "UPDATE_HEADER";
+export const UPDATE_CONTENT = "UPDATE_CONTENT";
+export const POST_SAVE_SUCCESS = "POST_SAVE_SUCCESS";
+export const POST_SAVE_ERROR = "POST_SAVE_ERROR";

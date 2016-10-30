@@ -104,6 +104,27 @@ object RouteFactory {
                   val (post, comments) = StorageStub.loadPost(postId)
                   complete(jsonResponse(PostData(post, comments).toJson))
                 }
+              } ~
+              post {
+                (path("new_post") & entity(as[JsValue])) {
+                  (json) => {
+                    val obj = json.asJsObject
+                    val header = jsonField(obj, "header")
+                    val content = jsonField(obj, "content")
+                    StorageStub.createPost(header, content)
+                    complete("Success")
+                  }
+                } ~
+                (path("update_post") & entity(as[JsValue])) {
+                  (json) => {
+                    val obj = json.asJsObject
+                    val id = jsonField(obj, "postId").toLong
+                    val header = jsonField(obj, "header")
+                    val content = jsonField(obj, "content")
+                    StorageStub.updatePost(id, header, content)
+                    complete("Success")
+                  }
+                }
               }
             }
           }
@@ -126,7 +147,7 @@ object RouteFactory {
   }
 
   private def isPostExists(id: Integer): Boolean = {
-    id > 0 && id < StorageStub.getPostCount
+    id > 0 && id <= StorageStub.getPostCount
   }
 
   private def jsonResponse(json: JsValue): HttpResponse = {

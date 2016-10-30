@@ -35,7 +35,7 @@ export function createOpenPostFunction(dispatch) {
         }).then(function (response) {
             dispatch({
                 type: OPEN_POST,
-                postId: postId,
+                postId: postId.toString(),
                 post: response.data.post,
                 comments: response.data.comments
             });
@@ -43,4 +43,21 @@ export function createOpenPostFunction(dispatch) {
             handleError(dispatch, error);
         });
     };
+}
+
+/**
+ * @param dispatch Redux dispatch method
+ * @returns {function} open post edit panel with empty data
+ */
+export function createOpenNewPostPanelFunction(dispatch) {
+    return () => dispatch({
+        type: OPEN_POST,
+        postId: null,
+        post: {
+            timestamp: "",
+            header: "",
+            content: ""
+        },
+        comments: []
+    });
 }

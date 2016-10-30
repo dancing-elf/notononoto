@@ -1,5 +1,11 @@
 import {copy} from "../../util/util";
-import {OPEN_POST} from "../../actions/ActionTypes";
+import {
+    OPEN_POST,
+    UPDATE_HEADER,
+    UPDATE_CONTENT,
+    POST_SAVE_SUCCESS,
+    POST_SAVE_ERROR
+} from "../../actions/ActionTypes";
 
 const initialState = {
     postId: "",
@@ -8,7 +14,9 @@ const initialState = {
         header: "",
         content: ""
     },
-    comments: []
+    comments: [],
+    postSaveSuccess: false,
+    postSaveError: false
 };
 
 /**
@@ -25,6 +33,18 @@ export function postData(state = initialState, action) {
                 post: action.post,
                 comments: action.comments
             });
+        case UPDATE_HEADER:
+            return copy(state, {
+                post: copy(state.post, {header: action.value})
+            });
+        case UPDATE_CONTENT:
+            return copy(state, {
+                post: copy(state.post, {content: action.value})
+            });
+        case POST_SAVE_SUCCESS:
+            return copy(state, {postSaveSuccess: true, postSaveError: false});
+        case POST_SAVE_ERROR:
+            return copy(state, {postSaveError: true, postSaveSuccess: false});
         default:
             return state;
     }

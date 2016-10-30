@@ -3,7 +3,8 @@ import {connect} from "react-redux";
 
 import {
     createLoadPostsDescFunction,
-    createOpenPostFunction
+    createOpenPostFunction,
+    createOpenNewPostPanelFunction
 } from "../../actions/admin/adminActions";
 import {getPostsDesc} from "../../reducers/admin/postsList";
 import {getAuthState} from "../../reducers/admin/auth";
@@ -16,11 +17,16 @@ class PostsList extends Component {
     componentDidMount() {
         this.props.loadPostsDesc(this.props.authToken);
     }
+    openNewPostPanel() {
+        this.props.openNewPostPanel();
+    }
     render() {
         const self = this;
         return <div>
             <div>
-                <input type="button" value="New"/>
+                <input type="button"
+                       value="New"
+                       onClick={this.openNewPostPanel.bind(this)}/>
             </div>
             <div>
                 {this.props.posts.map(function (post) {
@@ -53,7 +59,8 @@ PostsList.propTypes = {
         password: PropTypes.string.isRequired
     }).isRequired,
     loadPostsDesc: PropTypes.func.isRequired,
-    open: PropTypes.func.isRequired
+    open: PropTypes.func.isRequired,
+    openNewPostPanel: PropTypes.func.isRequired
 };
 
 const mapStateToProps = (state) => {
@@ -66,7 +73,8 @@ const mapStateToProps = (state) => {
 function mapDispatchToProps(dispatch) {
     return {
         loadPostsDesc: createLoadPostsDescFunction(dispatch),
-        open: createOpenPostFunction(dispatch)
+        open: createOpenPostFunction(dispatch),
+        openNewPostPanel: createOpenNewPostPanelFunction(dispatch)
     };
 }
 

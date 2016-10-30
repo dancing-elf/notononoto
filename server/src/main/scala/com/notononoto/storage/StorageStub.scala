@@ -28,16 +28,18 @@ object StorageStub {
     Comment(3, ZonedDateTime.now(), Some(2), "Zest", "Third comment")
   )
 
+  private var postsList = List(
+    Post(1, ZonedDateTime.now(), "Java language", read("java_post.txt"), 50),
+    Post(2, ZonedDateTime.now(), "Kotlin", read("kotlin_post.txt"), 25),
+    Post(3, ZonedDateTime.now(), "Rust language", read("rust_post.txt"), 70),
+    Post(4, ZonedDateTime.now(), "Scala lang", read("scala_post.txt"), 60)
+  )
+
   /**
     * @return list of posts
     */
   def loadPosts(): List[Post] = {
-    List(
-      Post(1, ZonedDateTime.now(), "Java language", read("java_post.txt"), 50),
-      Post(2, ZonedDateTime.now(), "Kotlin", read("kotlin_post.txt"), 25),
-      Post(3, ZonedDateTime.now(), "Rust language", read("rust_post.txt"), 70),
-      Post(4, ZonedDateTime.now(), "Scala lang", read("scala_post.txt"), 60)
-    )
+    postsList
   }
 
   /**
@@ -45,15 +47,14 @@ object StorageStub {
     * @return post data and list of it's comments
     */
   def loadPost(id: Long): (Post, List[Comment]) = {
-    (Post(1, ZonedDateTime.now(), "Java language", read("java_post.txt"), 50),
-      loadComments(1))
+    (postsList.find(_.id == id).get, loadComments(id))
   }
 
   /**
     * @return number of posts
     */
   def getPostCount: Integer = {
-    4
+    postsList.size
   }
 
   def addComment(postId: Long,
@@ -71,6 +72,29 @@ object StorageStub {
     */
   def loadComments(postId: Long): List[Comment] = {
     commentList
+  }
+
+  /**
+    * Add new post
+    * @param header title of post
+    * @param content content of post
+    */
+  def createPost(header: String, content: String) = {
+    val newPost = Post(postsList.size + 1, ZonedDateTime.now(), header, content, 50)
+    postsList = postsList :+ newPost
+  }
+
+  /**
+    * Update post
+    * @param id post id
+    * @param header title of post
+    * @param content content of post
+    */
+  def updatePost(id: Long, header: String, content: String) = {
+    postsList = postsList.map {
+      case x if x.id == id => Post(id, x.timestamp, header, content, x.previewPos)
+      case x => x
+    }
   }
 
   private def read(name: String): String = {

@@ -4,79 +4,78 @@ import {connect} from "react-redux";
 import {
     getPostIdState,
     getPostState,
-    getCommentsState
 } from "../../reducers/admin/postData";
-import {getAuthState} from "../../reducers/admin/auth";
 
-import {formatDate} from "../../util/util";
+import {
+    createUpdatePostHeaderFunction,
+    createUpdatePostContentFunction,
+    createSubmitPostDataAction
+} from "../../actions/admin/postDataActions";
 
 
 /** Admin post edit form */
 class PostData extends Component {
+    handleHeaderChange(e) {
+        this.props.updateHeader(e.target.value);
+    }
+    handleContentChange(e) {
+        this.props.updateContent(e.target.value);
+    }
+    handleSubmit(e) {
+        e.preventDefault();
+        this.props.submit();
+    }
     render() {
+        let messageBox = null;
+        if (this.props.postSaveSuccess) {
+            messageBox = <div className="success">Success</div>;
+        } else if (this.props.postSaveError) {
+            messageBox = <div className="error">Can't save post data</div>;
+        }
         return <div>
-            <div>
-                <div>Creation time</div>
-                <div className="dateTime">
-                    {formatDate(this.props.post.timestamp)}
-                </div>
-                <div>Header</div>
-                <div className="title">
-                    {this.props.post.header}
-                </div>
-                <div>Content</div>
-                <div>
-                    {this.props.post.content}
-                </div>
-            </div>
-            <div>Comments</div>
-            <table>
-                <tbody>
-                {this.props.comments.map(function (comment) {
-                    return <tr key={comment.id} className="comment">
-                        <td>{comment.id}.</td>
-                        <td>
-                            <div>{comment.text}</div>
-                            <div>
-                                <span>{comment.author}</span>
-                                <span>{formatDate(comment.timestamp)}</span>
-                            </div>
-                        </td>
-                    </tr>;
-                })}
-                </tbody>
-            </table>
+            <form noValidate onSubmit={this.handleSubmit.bind(this)}>
+                <div className="boxTitle">Header</div>
+                <input type="text"
+                       onChange={this.handleHeaderChange.bind(this)}
+                       value={this.props.post.header}/>
+                <div className="boxTitle">Content</div>
+                <textarea onChange={this.handleContentChange.bind(this)}
+                          value={this.props.post.content}/>
+                <input type="submit" value="Save"/>
+                {messageBox}
+            </form>
         </div>;
     }
 }
 
 PostData.propTypes = {
-    postId: PropTypes.number.isRequired,
     post: PropTypes.shape({
         timestamp: PropTypes.string.isRequired,
         header: PropTypes.string.isRequired,
         content: PropTypes.string.isRequired
     }).isRequired,
-    comments: PropTypes.arrayOf(PropTypes.shape({
-        id: PropTypes.number.isRequired,
-        parentId: PropTypes.number,
-        author: PropTypes.string.isRequired,
-        timestamp: PropTypes.string.isRequired,
-        text: PropTypes.string.isRequired
-    })).isRequired,
-    authToken: PropTypes.shape({
-        login: PropTypes.string.isRequired,
-        password: PropTypes.string.isRequired
-    }).isRequired,
+    postSaveSuccess: PropTypes.bool.isRequired,
+    postSaveError: PropTypes.bool.isRequired,
+    submit: PropTypes.func.isRequired,
+    updateHeader: PropTypes.func.isRequired,
+    updateContent: PropTypes.func.isRequired
 };
 
 function mapStateToProps(state) {
     return {
         postId: getPostIdState(state),
         post: getPostState(state),
-        comments: getCommentsState(state),
-        authToken: getAuthState(state)
+        postSaveSuccess: state.postData.postSaveSuccess,
+        postSaveError: state.postData.postSaveError
     };
 }
 
-export default connect(mapStateToProps)(PostData);
+function mapDispatchToProps(dispatch) {
+    return {
+        submit: () => dispatch(createSubmitPostDataAction()),
+        updateHeader: createUpdatePostHeaderFunction(dispatch),
+        updateContent: createUpdatePostContentFunction(dispatch)
+    };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(PostData);
