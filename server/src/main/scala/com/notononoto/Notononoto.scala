@@ -2,8 +2,8 @@ package com.notononoto
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
-
 import akka.stream.ActorMaterializer
+import com.notononoto.dao.NotononotoDao
 
 import scala.io.StdIn
 
@@ -16,10 +16,13 @@ object Notononoto {
       return
     }
     val webRoot = args(0) + "/webapp"
+    val dbRoot = args(0) + "/db"
 
     implicit val system = ActorSystem("ws-actors")
     implicit val materializer = ActorMaterializer()
     implicit val executionContext = system.dispatcher
+
+    NotononotoDao.prepare(dbRoot)
 
     val bindingFuture = Http().bindAndHandle(
       RouteFactory.createRoute(webRoot), "localhost", 8080)

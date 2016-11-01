@@ -1,18 +1,19 @@
 package com.notononoto
 
-import java.time.ZonedDateTime
-import java.time.format.DateTimeFormatter
+import java.time.LocalDateTime
 
+import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.model.headers._
 import akka.http.scaladsl.model.{ContentTypes, HttpEntity, HttpResponse}
 import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.{RejectionHandler, Route}
-import com.notononoto.storage.{Comment, Post, StorageStub}
-import spray.json._
-import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.server.directives.Credentials
+import akka.http.scaladsl.server.{RejectionHandler, Route}
+import com.notononoto.dao.{Comment, NotononotoDao, Post}
+import com.notononoto.util.ConverterUtils
 import com.typesafe.scalalogging.Logger
 import org.slf4j.LoggerFactory
+import resource._
+import spray.json._
 
 
 /** Factory for application routing */
@@ -25,19 +26,17 @@ object RouteFactory {
 
   object JsonProtocol extends DefaultJsonProtocol {
 
-    /** Format of date for sending to client */
-    val format = DateTimeFormatter.ofPattern("HH-mm-ss dd-MM-yyyy")
-    /** ZonedDateTime formater */
-    implicit object DateJsonFormat extends RootJsonFormat[ZonedDateTime] {
-      def write(dateTime: ZonedDateTime) = JsString(format.format(dateTime))
+    /** LocalDateTime formater */
+    implicit object DateJsonFormat extends RootJsonFormat[LocalDateTime] {
+      def write(dateTime: LocalDateTime) = JsString(ConverterUtils.dateToString(dateTime))
       def read(value: JsValue) =
         throw new NotImplementedError("Read of ZonedDateTime not supported")
     }
 
     /** Json provider for posts */
-    implicit val postProtocol = jsonFormat5(Post)
+    implicit val postProtocol = jsonFormat4(Post)
     /** Json provider for comments */
-    implicit val commentProtocol = jsonFormat5(Comment)
+    implicit val commentProtocol = jsonFormat6(Comment)
     /** Json provider for PostData */
     implicit val postDataProtocol = jsonFormat2(PostData)
   }
@@ -57,6 +56,11 @@ object RouteFactory {
     */
   def createRoute(webRoot: String): Route = {
 
+    def isPostExists(id: Long): Boolean = {
+      managed(NotononotoDao()) acquireAndGet { dao =>
+        id > 0 && id <= dao.getPostCount
+      }
+    }
     // Only existed postId can be handled
     val IntNumberExists = IntNumber
       .flatMap(id => if (isPostExists(id)) Some(id) else None)
@@ -69,11 +73,16 @@ object RouteFactory {
           pathPrefix("public") {
             get {
               path("posts") {
-                complete(jsonResponse(StorageStub.loadPosts().toJson))
+                managed(NotononotoDao()) acquireAndGet { dao =>
+                  val posts = dao.loadPosts()
+                  complete(jsonResponse(posts.toJson))
+                }
               } ~
               path("post" / IntNumberExists) { postId =>
-                val (post, comments) = StorageStub.loadPost(postId)
-                complete(jsonResponse(PostData(post, comments).toJson))
+                managed(NotononotoDao()) acquireAndGet { dao =>
+                  val (post, comments) = dao.loadPost(postId)
+                  complete(jsonResponse(PostData(post, comments).toJson))
+                }
               }
             } ~
             post {
@@ -81,10 +90,12 @@ object RouteFactory {
                 (json) => {
                   val obj = json.asJsObject
                   val postIdLong = jsonField(obj, "postId").toLong
-                  StorageStub.addComment(postIdLong, jsonField(obj, "author"),
-                    jsonField(obj, "email"), jsonField(obj, "text"))
-                  val comments = StorageStub.loadComments(postIdLong)
-                  complete(jsonResponse(comments.toJson))
+                  managed(NotononotoDao()) acquireAndGet { dao =>
+                    dao.addComment(postIdLong, jsonField(obj, "author"),
+                      jsonField(obj, "email"), jsonField(obj, "text"))
+                    val comments = dao.loadComments(postIdLong)
+                    complete(jsonResponse(comments.toJson))
+                  }
                 }
               }
             }
@@ -98,31 +109,38 @@ object RouteFactory {
                 } ~
                 path("posts") {
                   log.debug("request received")
-                  complete(jsonResponse(StorageStub.loadPosts().toJson))
+                  managed(NotononotoDao()) acquireAndGet { dao =>
+                    val posts = dao.loadPosts()
+                    complete(jsonResponse(posts.toJson))
+                  }
                 } ~
                 path("post" / IntNumberExists) { postId =>
-                  val (post, comments) = StorageStub.loadPost(postId)
-                  complete(jsonResponse(PostData(post, comments).toJson))
+                  managed(NotononotoDao()) acquireAndGet { dao =>
+                    val (post, comments) = dao.loadPost(postId)
+                    complete(jsonResponse(PostData(post, comments).toJson))
+                  }
                 }
               } ~
               post {
                 (path("new_post") & entity(as[JsValue])) {
                   (json) => {
                     val obj = json.asJsObject
-                    val header = jsonField(obj, "header")
-                    val content = jsonField(obj, "content")
-                    StorageStub.createPost(header, content)
+                    managed(NotononotoDao()) acquireAndGet { dao =>
+                      dao.createPost(jsonField(obj, "header"),
+                                     jsonField(obj, "content"))
+                    }
                     complete("Success")
                   }
                 } ~
                 (path("update_post") & entity(as[JsValue])) {
                   (json) => {
                     val obj = json.asJsObject
-                    val id = jsonField(obj, "postId").toLong
-                    val header = jsonField(obj, "header")
-                    val content = jsonField(obj, "content")
-                    StorageStub.updatePost(id, header, content)
-                    complete("Success")
+                    managed(NotononotoDao()) acquireAndGet { dao =>
+                      dao.updatePost(jsonField(obj, "postId").toLong,
+                                     jsonField(obj, "header"),
+                                     jsonField(obj, "content"))
+                      complete("Success")
+                    }
                   }
                 }
               }
@@ -132,7 +150,7 @@ object RouteFactory {
       }
     } ~
     (get & path("bundle.js")) {
-      getFromFile(webRoot + "/public.js")
+      getFromFile(webRoot + "/bundle.js")
     } ~
     (get & path("favicon.png")) {
       getFromFile(webRoot + "/favicon.png")
@@ -144,10 +162,6 @@ object RouteFactory {
 
   private def jsonField(obj: JsObject, name: String): String = {
     obj.fields(name).convertTo[String]
-  }
-
-  private def isPostExists(id: Integer): Boolean = {
-    id > 0 && id <= StorageStub.getPostCount
   }
 
   private def jsonResponse(json: JsValue): HttpResponse = {

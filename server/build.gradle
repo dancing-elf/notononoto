@@ -17,6 +17,8 @@ dependencies {
     compile "com.typesafe.akka:akka-http-spray-json-experimental_2.11:$akkaVersion"
     compile "ch.qos.logback:logback-classic:1.1.7"
     compile "com.typesafe.scala-logging:scala-logging_2.11:3.4.0"
+    compile "com.orientechnologies:orientdb-core:2.2.12"
+    compile "com.jsuereth:scala-arm_2.11:1.4"
 
     testCompile "junit:junit:4.12"
     testCompile "org.scalatest:scalatest_2.11:3.0.0"
