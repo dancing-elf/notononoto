@@ -8,7 +8,7 @@ import akka.http.scaladsl.model.{ContentTypes, HttpEntity, HttpResponse}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.directives.Credentials
 import akka.http.scaladsl.server.{RejectionHandler, Route}
-import com.notononoto.dao.{Comment, NotononotoDao, Post}
+import com.notononoto.dao.{Comment, NotononotoDao, NotononotoDaoCreator, Post}
 import com.notononoto.util.ConverterUtils
 import com.typesafe.scalalogging.Logger
 import org.slf4j.LoggerFactory
@@ -53,11 +53,12 @@ object RouteFactory {
   /**
     * Create web route
     * @param webRoot directory with frontend's content
+    * @param daoCreator database dao manager
     */
-  def createRoute(webRoot: String): Route = {
+  def createRoute(webRoot: String, daoCreator: NotononotoDaoCreator): Route = {
 
     def isPostExists(id: Long): Boolean = {
-      managed(NotononotoDao()) acquireAndGet { dao =>
+      managed(daoCreator.create()) acquireAndGet { dao =>
         id > 0 && id <= dao.getPostCount
       }
     }
@@ -73,13 +74,13 @@ object RouteFactory {
           pathPrefix("public") {
             get {
               path("posts") {
-                managed(NotononotoDao()) acquireAndGet { dao =>
+                managed(daoCreator.create()) acquireAndGet { dao =>
                   val posts = dao.loadPosts()
                   complete(jsonResponse(posts.toJson))
                 }
               } ~
               path("post" / IntNumberExists) { postId =>
-                managed(NotononotoDao()) acquireAndGet { dao =>
+                managed(daoCreator.create()) acquireAndGet { dao =>
                   val (post, comments) = dao.loadPost(postId)
                   complete(jsonResponse(PostData(post, comments).toJson))
                 }
@@ -90,7 +91,7 @@ object RouteFactory {
                 (json) => {
                   val obj = json.asJsObject
                   val postIdLong = jsonField(obj, "postId").toLong
-                  managed(NotononotoDao()) acquireAndGet { dao =>
+                  managed(daoCreator.create()) acquireAndGet { dao =>
                     dao.addComment(postIdLong, jsonField(obj, "author"),
                       jsonField(obj, "email"), jsonField(obj, "text"))
                     val comments = dao.loadComments(postIdLong)
@@ -109,13 +110,13 @@ object RouteFactory {
                 } ~
                 path("posts") {
                   log.debug("request received")
-                  managed(NotononotoDao()) acquireAndGet { dao =>
+                  managed(daoCreator.create()) acquireAndGet { dao =>
                     val posts = dao.loadPosts()
                     complete(jsonResponse(posts.toJson))
                   }
                 } ~
                 path("post" / IntNumberExists) { postId =>
-                  managed(NotononotoDao()) acquireAndGet { dao =>
+                  managed(daoCreator.create()) acquireAndGet { dao =>
                     val (post, comments) = dao.loadPost(postId)
                     complete(jsonResponse(PostData(post, comments).toJson))
                   }
@@ -125,7 +126,7 @@ object RouteFactory {
                 (path("new_post") & entity(as[JsValue])) {
                   (json) => {
                     val obj = json.asJsObject
-                    managed(NotononotoDao()) acquireAndGet { dao =>
+                    managed(daoCreator.create()) acquireAndGet { dao =>
                       dao.createPost(jsonField(obj, "header"),
                                      jsonField(obj, "content"))
                     }
@@ -135,7 +136,7 @@ object RouteFactory {
                 (path("update_post") & entity(as[JsValue])) {
                   (json) => {
                     val obj = json.asJsObject
-                    managed(NotononotoDao()) acquireAndGet { dao =>
+                    managed(daoCreator.create()) acquireAndGet { dao =>
                       dao.updatePost(jsonField(obj, "postId").toLong,
                                      jsonField(obj, "header"),
                                      jsonField(obj, "content"))

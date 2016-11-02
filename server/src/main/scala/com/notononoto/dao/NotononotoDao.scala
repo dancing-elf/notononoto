@@ -157,30 +157,29 @@ class NotononotoDao(db: ODatabaseDocumentTx) {
   }
 }
 
-object NotononotoDao {
+/** Class for managing dao creation */
+class NotononotoDaoCreator(url: String) {
 
   /**
-    * Path to database. Too dirty. Maybe factory or global settings
-    * will be better
+    * @return [[NotononotoDao]]
     */
-  var databaseUrl: String = _
-
-  def apply(): NotononotoDao = {
-    // pool should be here
+  def create(): NotononotoDao = {
     val db: ODatabaseDocumentTx =
-      new ODatabaseDocumentTx(databaseUrl).open("admin", "admin")
+        new ODatabaseDocumentTx(url).open("admin", "admin")
     new NotononotoDao(db)
   }
+}
+
+/** Object for managing database initialization */
+object NotononotoDaoCreator {
 
   /**
     * Initialize orientdb
     * @param root path to server folder
     */
-  def prepare(root: String): Unit = {
-
-    databaseUrl = "plocal:" + root + "/notononoto.orient"
-
-    val db = new ODatabaseDocumentTx(databaseUrl)
+  def apply(root: String): NotononotoDaoCreator = {
+    val url = "plocal:" + root + "/notononoto.orient"
+    val db = new ODatabaseDocumentTx(url)
     if (!db.exists()) {
       db.create()
       managed(db) acquireAndGet { resource =>
@@ -193,5 +192,6 @@ object NotononotoDao {
         resource.getMetadata.getSchema.createClass("Comment")
       }
     }
+    new NotononotoDaoCreator(url)
   }
 }
