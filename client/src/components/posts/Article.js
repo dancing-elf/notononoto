@@ -1,10 +1,14 @@
 import React, {PropTypes, Component} from "react";
+import showdown from "showdown";
 
-import {formatDate} from "../../util/util";
+import {formatDate, highlight} from "../../util/util";
 
 
 /** Main article with it's properties */
 export default class Article extends Component {
+    componentDidMount() {
+        highlight();
+    }
     render() {
         const post = this.props.post;
         return <div>
@@ -14,9 +18,8 @@ export default class Article extends Component {
             <div className="title">
                 {post.header}
             </div>
-            <div>
-                {post.content}
-            </div>
+            <div dangerouslySetInnerHTML=
+                     {{__html: new showdown.Converter().makeHtml(post.content)}}/>
         </div>;
     }
 }

@@ -4,6 +4,7 @@ import {Provider} from "react-redux";
 import {Router, Route, IndexRoute, browserHistory} from "react-router";
 
 import "./index.css";
+import "highlight.js/styles/idea.css";
 
 import CommonLayout from "./components/common/CommonLayout";
 import PostBoard from "./components/index/PostBoard";

@@ -103,7 +103,6 @@ CommentForm.propTypes = {
     updateEmail: PropTypes.func.isRequired,
     updateComment: PropTypes.func.isRequired,
     resetAutoFocus: PropTypes.func.isRequired,
-    resetCommentFormState: PropTypes.func.isRequired,
 
     authorValue: PropTypes.string.isRequired,
     authorHasError: PropTypes.bool.isRequired,
