@@ -22,13 +22,13 @@ class RouteTest extends WordSpec with Matchers with ScalatestRouteTest {
   Mockito.when(dao.loadPosts()).thenReturn(List())
   Mockito.when(dao.loadPost(2L)).
     thenReturn((com.notononoto.dao.Post(2L, LocalDateTime.now(), "", ""), List()))
-  Mockito.when(dao.getPostCount).thenReturn(2)
+  Mockito.when(dao.isPostExists(2)).thenReturn(true)
 
   val daoCreator = Mockito.mock(classOf[NotononotoDaoCreator])
   Mockito.when(daoCreator.create()).thenReturn(dao)
 
 
-  val route = RouteFactory.createRoute("", daoCreator)
+  val route = RouteFactory.createRoute("", daoCreator, "admin", "admin")
 
   "The server" should {
     "correctly handle posts list request" in {

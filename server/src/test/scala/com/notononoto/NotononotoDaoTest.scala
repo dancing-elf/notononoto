@@ -26,7 +26,10 @@ class NotononotoDaoTest extends WordSpec with Matchers with BeforeAndAfterAll {
       dao.createPost("header1", "content1")
       dao.createPost("header2", "content2")
 
-      dao.getPostCount shouldEqual 2L
+      dao.isPostExists(1) shouldEqual true
+      dao.isPostExists(2) shouldEqual true
+      dao.isPostExists(0) shouldEqual false
+      dao.isPostExists(10) shouldEqual false
 
       def checkSecondPost(post: Post) = {
         post should have(

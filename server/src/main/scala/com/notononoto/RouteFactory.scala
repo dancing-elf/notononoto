@@ -42,29 +42,22 @@ object RouteFactory {
   }
   import JsonProtocol._
 
-  /** Check admin password */
-  def passAuthenticator(credentials: Credentials): Option[String] =
-    credentials match {
-      case p @ Credentials.Provided(id)
-        if id == "admin" && p.verify("admin") => Some(id)
-      case _ => None
-    }
-
   /**
     * Create web route
     * @param webRoot directory with frontend's content
     * @param daoCreator database dao manager
+    * @param adminLogin admin login
+    * @param adminPassword admin password
+    * @return [[Route]]
     */
-  def createRoute(webRoot: String, daoCreator: NotononotoDaoCreator): Route = {
+  def createRoute(webRoot: String, daoCreator: NotononotoDaoCreator,
+                  adminLogin: String, adminPassword: String): Route = {
 
-    def isPostExists(id: Long): Boolean = {
-      managed(daoCreator.create()) acquireAndGet { dao =>
-        id > 0 && id <= dao.getPostCount
-      }
-    }
     // Only existed postId can be handled
     val IntNumberExists = IntNumber
-      .flatMap(id => if (isPostExists(id)) Some(id) else None)
+      .flatMap(id => if (isPostExists(id, daoCreator)) Some(id) else None)
+    // admin part guard
+    val authenticator = createAuthenticator(adminLogin, adminPassword)
 
     pathPrefix("api") {
       respondWithHeaders(
@@ -102,7 +95,7 @@ object RouteFactory {
             }
           } ~
           pathPrefix("admin") {
-            authenticateBasic(realm = "admin part", passAuthenticator) { user =>
+            authenticateBasic(realm = "admin part", authenticator) { user =>
               get {
                 path("login") {
                   log.debug("success")
@@ -158,6 +151,25 @@ object RouteFactory {
     } ~
     get {
       getFromFile(webRoot + "/index.html")
+    }
+  }
+
+  /**
+    * @param login admin login
+    * @param password admin password
+    * @return object for checking admin login and password
+    */
+  private def createAuthenticator(login: String,
+                                  password: String): Authenticator[String] = {
+    case p@Credentials.Provided(id)
+      if id == login && p.verify(password) => Some(id)
+    case _ => None
+  }
+
+  private def isPostExists(id: Long,
+                           daoCreator: NotononotoDaoCreator): Boolean = {
+    managed(daoCreator.create()) acquireAndGet { dao =>
+      dao.isPostExists(id)
     }
   }
 

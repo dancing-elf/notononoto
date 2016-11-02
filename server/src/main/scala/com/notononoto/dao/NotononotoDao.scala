@@ -35,10 +35,13 @@ class NotononotoDao(db: ODatabaseDocumentTx) {
   }
 
   /**
-    * @return number of posts
+    * @return true if post exists in database
     */
-  def getPostCount: Long = {
-    db.countClass("Post")
+  def isPostExists(id: Long): Boolean = {
+    val count: Long =
+      getOne(query(db, "select count(*) from Post where id=?", id)).
+        field("count")
+    count == 1
   }
 
   /**
@@ -164,6 +167,10 @@ class NotononotoDaoCreator(url: String) {
     * @return [[NotononotoDao]]
     */
   def create(): NotononotoDao = {
+    // We are using local database so we can not worry about
+    // security of database. If malefactor has access to our
+    // file system all is very very bad in any case, otherwise
+    // the database will be safe
     val db: ODatabaseDocumentTx =
         new ODatabaseDocumentTx(url).open("admin", "admin")
     new NotononotoDao(db)
@@ -183,6 +190,7 @@ object NotononotoDaoCreator {
     if (!db.exists()) {
       db.create()
       managed(db) acquireAndGet { resource =>
+        // Create database's sequences and schemas
         val lib = resource.getMetadata.getSequenceLibrary
         lib.createSequence("post_seq",
           SEQUENCE_TYPE.ORDERED, new OSequence.CreateParams().setStart(0L))
