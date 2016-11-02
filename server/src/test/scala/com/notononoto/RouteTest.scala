@@ -14,6 +14,7 @@ import org.scalatest.junit.JUnitRunner
 import org.mockito.Mockito
 
 
+/** Test request handling */
 @RunWith(classOf[JUnitRunner])
 class RouteTest extends WordSpec with Matchers with ScalatestRouteTest {
 
