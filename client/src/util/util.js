@@ -1,4 +1,5 @@
 import hljs from "highlight.js";
+import showdown from "showdown";
 
 /**
  * @param serverDate date in server format
@@ -34,4 +35,12 @@ export function copy(original, changes) {
 export function highlight() {
     hljs.initHighlighting.called = false;
     hljs.initHighlighting();
+}
+
+/**
+ * @param markdown post's markdown
+ * @return {string} html
+ */
+export function makeHtml(markdown) {
+    return new showdown.Converter().makeHtml(markdown);
 }

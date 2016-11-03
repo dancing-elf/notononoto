@@ -8,7 +8,7 @@ import akka.http.scaladsl.model.{ContentTypes, HttpEntity, HttpResponse}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.directives.Credentials
 import akka.http.scaladsl.server.{RejectionHandler, Route}
-import com.notononoto.dao.{Comment, NotononotoDao, NotononotoDaoCreator, Post}
+import com.notononoto.dao.{Comment, NotononotoDaoCreator, Post}
 import com.notononoto.util.ConverterUtils
 import com.typesafe.scalalogging.Logger
 import org.slf4j.LoggerFactory
@@ -18,6 +18,9 @@ import spray.json._
 
 /** Factory for application routing */
 object RouteFactory {
+
+  /** Custom tag to separate post opening from post continuation */
+  private val NOTONONOTOCUT = "<notononotocut/>"
 
   private val log = Logger(LoggerFactory.getLogger(this.getClass))
 
@@ -30,7 +33,7 @@ object RouteFactory {
     implicit object DateJsonFormat extends RootJsonFormat[LocalDateTime] {
       def write(dateTime: LocalDateTime) = JsString(ConverterUtils.dateToString(dateTime))
       def read(value: JsValue) =
-        throw new NotImplementedError("Read of ZonedDateTime not supported")
+        throw new NotImplementedError("Read of LocalDateTime not supported")
     }
 
     /** Json provider for posts */
@@ -68,14 +71,23 @@ object RouteFactory {
             get {
               path("posts") {
                 managed(daoCreator.create()) acquireAndGet { dao =>
-                  val posts = dao.loadPosts()
+                  // A little bit ugly, but if there will be performance
+                  // problems simple cache will solve it. We need cache here
+                  // in any case, because database requests here. So no reason
+                  // to make very complex data model
+                  val posts = dao.loadPosts().map(post =>
+                    Post(post.id, post.timestamp, post.header,
+                      getOpening(post.content)))
                   complete(jsonResponse(posts.toJson))
                 }
               } ~
               path("post" / IntNumberExists) { postId =>
                 managed(daoCreator.create()) acquireAndGet { dao =>
                   val (post, comments) = dao.loadPost(postId)
-                  complete(jsonResponse(PostData(post, comments).toJson))
+                  // see comment to /api/public/posts requests
+                  val view = Post(post.id, post.timestamp, post.header,
+                      removeCut(post.content))
+                  complete(jsonResponse(PostData(view, comments).toJson))
                 }
               }
             } ~
@@ -180,5 +192,13 @@ object RouteFactory {
   private def jsonResponse(json: JsValue): HttpResponse = {
     HttpResponse(entity=
       HttpEntity(ContentTypes.`application/json`, json.compactPrint))
+  }
+
+  private def getOpening(content: String): String = {
+    content.split(NOTONONOTOCUT)(0)
+  }
+
+  private def removeCut(content: String): String = {
+    content.replaceFirst(NOTONONOTOCUT, "")
   }
 }

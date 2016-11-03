@@ -1,7 +1,6 @@
 import React, {PropTypes, Component} from "react";
-import showdown from "showdown";
 
-import {formatDate, highlight} from "../../util/util";
+import {formatDate, makeHtml, highlight} from "../../util/util";
 
 
 /** Main article with it's properties */
@@ -18,8 +17,7 @@ export default class Article extends Component {
             <div className="title">
                 {post.header}
             </div>
-            <div dangerouslySetInnerHTML=
-                     {{__html: new showdown.Converter().makeHtml(post.content)}}/>
+            <div dangerouslySetInnerHTML={{__html: makeHtml(post.content)}}/>
         </div>;
     }
 }

@@ -1,11 +1,10 @@
 import React, {Component, PropTypes} from "react";
 import {connect} from "react-redux";
 import {Link} from "react-router";
-import showdown from "showdown";
 
 import {getPosts} from "../../reducers/public/postBoard";
 import {createLoadPostsFunction} from "../../actions/public/postBoardActions";
-import {formatDate, highlight} from "../../util/util";
+import {formatDate, makeHtml, highlight} from "../../util/util";
 
 
 /** List of posts */
@@ -29,8 +28,7 @@ class PostBoard extends Component {
                         <div className="title">
                             {post.header}
                         </div>
-                        <div dangerouslySetInnerHTML=
-                                 {{__html: new showdown.Converter().makeHtml(post.content)}}/>
+                        <div dangerouslySetInnerHTML={{__html: makeHtml(post.content)}}/>
                         <Link to={"/posts/" + post.id}>
                             続きを読む...
                         </Link>
