@@ -14,6 +14,10 @@ import resource._
 
 object Notononoto {
 
+  implicit val system = ActorSystem("ws-actors")
+  implicit val materializer = ActorMaterializer()
+  implicit val executionContext = system.dispatcher
+
   final case class NotononotoConfig(host: String, port: Integer,
                                     adminLogin: String, adminPassword: String)
 
@@ -24,10 +28,6 @@ object Notononoto {
       return
     }
     val root = args(0)
-
-    implicit val system = ActorSystem("ws-actors")
-    implicit val materializer = ActorMaterializer()
-    implicit val executionContext = system.dispatcher
 
     val config: NotononotoConfig = readProps(root + "/conf/notononoto.properties")
     val daoCreator = NotononotoDaoCreator(root + "/db")

@@ -4,7 +4,11 @@ import {
     UPDATE_HEADER,
     UPDATE_CONTENT,
     POST_SAVE_SUCCESS,
-    POST_SAVE_ERROR
+    POST_SAVE_ERROR,
+    FILE_LOAD_INFO_CLEANUP,
+    FILE_LOAD_SUCCESS,
+    FILE_LOAD_ERROR,
+    UPDATE_IMAGES_LIST
 } from "../../actions/ActionTypes";
 
 const initialState = {
@@ -16,7 +20,10 @@ const initialState = {
     },
     comments: [],
     postSaveSuccess: false,
-    postSaveError: false
+    postSaveError: false,
+    successFiles: "",
+    errorFiles: "",
+    images: []
 };
 
 /**
@@ -45,6 +52,18 @@ export function postData(state = initialState, action) {
             return copy(state, {postSaveSuccess: true, postSaveError: false});
         case POST_SAVE_ERROR:
             return copy(state, {postSaveError: true, postSaveSuccess: false});
+        case FILE_LOAD_INFO_CLEANUP:
+            return copy(state, {successFiles: "", errorFiles: ""});
+        case FILE_LOAD_SUCCESS:
+            return copy(state, {
+                successFiles: state.successFiles + " " + action.fileName
+            });
+        case FILE_LOAD_ERROR:
+            return copy(state, {
+                errorFiles: state.errorFiles + " " + action.fileName
+            });
+        case UPDATE_IMAGES_LIST:
+            return copy(state, {images: action.images});
         default:
             return state;
     }

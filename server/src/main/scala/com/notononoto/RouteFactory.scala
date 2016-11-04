@@ -1,5 +1,6 @@
 package com.notononoto
 
+import java.nio.file.{Files, Path, Paths}
 import java.time.LocalDateTime
 
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
@@ -8,12 +9,16 @@ import akka.http.scaladsl.model.{ContentTypes, HttpEntity, HttpResponse}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.directives.Credentials
 import akka.http.scaladsl.server.{RejectionHandler, Route}
+import akka.stream.scaladsl.FileIO
 import com.notononoto.dao.{Comment, NotononotoDaoCreator, Post}
 import com.notononoto.util.ConverterUtils
 import com.typesafe.scalalogging.Logger
 import org.slf4j.LoggerFactory
 import resource._
 import spray.json._
+import com.notononoto.Notononoto._
+
+import scala.util.{Failure, Success}
 
 
 /** Factory for application routing */
@@ -125,6 +130,15 @@ object RouteFactory {
                     val (post, comments) = dao.loadPost(postId)
                     complete(jsonResponse(PostData(post, comments).toJson))
                   }
+                } ~
+                path("upload_file" / IntNumber) { postId =>
+                  val path = getFullResPath(postId, webRoot)
+                  if (Files.exists(path)) {
+                    val files = path.toFile.listFiles.toList.map(_.getName())
+                    complete(jsonResponse(files.toJson))
+                  } else {
+                    complete(jsonResponse(List[String]().toJson))
+                  }
                 }
               } ~
               post {
@@ -148,12 +162,33 @@ object RouteFactory {
                       complete("Success")
                     }
                   }
+                } ~
+                (path("upload_file" / IntNumberExists) & fileUpload("file")) {
+                  case (postId, (fileInfo, fileStream)) =>
+                    val dir = getFullResPath(postId, webRoot)
+                    if (Files.notExists(dir)) {
+                      this.synchronized {
+                        Files.createDirectories(dir)
+                      }
+                    }
+                    val file = dir.resolve(fileInfo.fileName)
+                    log.debug("try write file: {}", file)
+                    val writeResult = fileStream.runWith(FileIO.toPath(file))
+                    onSuccess(writeResult) { result =>
+                      result.status match {
+                        case Success(_) => complete("Success")
+                        case Failure(e) => throw e
+                      }
+                    }
                 }
               }
             }
           }
         }
       }
+    } ~
+    (get & pathPrefix("res")) {
+      getFromDirectory(getResPath(webRoot).toString)
     } ~
     (get & path("bundle.js")) {
       getFromFile(webRoot + "/bundle.js")
@@ -164,6 +199,14 @@ object RouteFactory {
     get {
       getFromFile(webRoot + "/index.html")
     }
+  }
+
+  private def getFullResPath(postId: Long, webRoot: String): Path = {
+    getResPath(webRoot).resolve(postId.toString)
+  }
+
+  private def getResPath(webRoot: String): Path = {
+    Paths.get(webRoot).resolve("../db/res")
   }
 
   /**
