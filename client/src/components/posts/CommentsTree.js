@@ -12,12 +12,14 @@ import {
 class CommentsTree extends Component {
     render() {
         const self = this;
-        return <div>
-            <div className="commentTitle">コメント</div>
-            <table><tbody>
+        let content;
+        if (this.props.comments.length == 0) {
+            content = <div>コメントがありません</div>;
+        } else {
+            content = <table><tbody>
                 {this.props.comments.map(function (comment) {
                     return <tr key={comment.id} className="comment">
-                        <td>{comment.id}.</td>
+                        <td>{comment.number}.</td>
                         <td>
                             <div>{comment.text}</div>
                             <div className="commentBox">
@@ -27,14 +29,13 @@ class CommentsTree extends Component {
                             <div className="answerBox">
                                 <a href="javascript:void(0);"
                                    onClick={function () {
-                                       self.props.answer(comment.author);
+                                       self.props.answer(comment.number);
                                    }}>
                                     答え
                                 </a>
                                 <a href="javascript:void(0);"
                                    onClick={function () {
-                                       self.props.quote(
-                                           comment.author, comment.text);
+                                       self.props.quote(comment);
                                    }}>
                                     引用
                                 </a>
@@ -42,7 +43,11 @@ class CommentsTree extends Component {
                         </td>
                     </tr>;
                 })}
-            </tbody></table>
+                </tbody></table>;
+        }
+        return <div>
+            <div className="commentTitle">コメント</div>
+            {content}
         </div>;
     }
 }
@@ -50,7 +55,8 @@ class CommentsTree extends Component {
 CommentsTree.propTypes = {
     comments: PropTypes.arrayOf(PropTypes.shape({
         id: PropTypes.number.isRequired,
-        parentId: PropTypes.number,
+        postId: PropTypes.number.isRequired,
+        number: PropTypes.number.isRequired,
         author: PropTypes.string.isRequired,
         timestamp: PropTypes.string.isRequired,
         text: PropTypes.string.isRequired

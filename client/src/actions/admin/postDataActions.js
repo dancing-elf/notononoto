@@ -160,7 +160,7 @@ export function createLoadImagesNamesAction() {
         const postData = getState().postData;
         const authToken = getAuthState(getState());
 
-        // post id not created yet
+        // post id is not created yet
         if (!postData.postId) {
             return;
         }

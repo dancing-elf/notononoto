@@ -53,14 +53,17 @@ export function commentForm(state = initialState, action) {
                 state : copy(state, {commentValue: action.value});
         case REPLY_COMMENT:
             return copy(state, {
-                commentValue: "@" + action.author + ", " + state.commentValue,
+                commentValue: "#" + action.number + ", " + state.commentValue,
                 focusInput: COMMENT_INPUT
             });
-        case QUOTE_COMMENT:
+        case QUOTE_COMMENT: {
+            const quote = "@" + action.author + ":\n" +
+                "「" + action.text + "」\n";
             return copy(state, {
-                commentValue: "「" + action.comment + "」" + state.commentValue,
+                commentValue: quote + state.commentValue,
                 focusInput: COMMENT_INPUT
             });
+        }
         case CLEAN_COMMENT_FORM:
             return initialState;
         case COMMENT_INVALID:

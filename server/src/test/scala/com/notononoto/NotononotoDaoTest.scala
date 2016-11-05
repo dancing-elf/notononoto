@@ -48,11 +48,12 @@ class NotononotoDaoTest extends WordSpec with Matchers with BeforeAndAfterAll {
       )
       checkSecondPost(posts(1))
 
-      def checkSecondComments(comments: List[Comment]) = {
+      def checkComment(comments: List[Comment]) = {
         comments should have length 1
         comments.head should have(
           'id (1),
           'postId (2),
+          'number (1),
           'author ("jack"),
           'email ("jack@gmail.com"),
           'text ("test")
@@ -60,11 +61,11 @@ class NotononotoDaoTest extends WordSpec with Matchers with BeforeAndAfterAll {
       }
       /** Insert comment */
       dao.addComment(2, "jack", "jack@gmail.com", "test")
-      checkSecondComments(dao.loadComments(2))
+      checkComment(dao.loadComments(2))
 
       val (post, comments) = dao.loadPost(2)
       checkSecondPost(post)
-      checkSecondComments(comments)
+      checkComment(comments)
 
       /** Update post */
       dao.updatePost(2, "new header", "new content")
@@ -73,6 +74,18 @@ class NotononotoDaoTest extends WordSpec with Matchers with BeforeAndAfterAll {
         'id (2),
         'header ("new header"),
         'content ("new content")
+      )
+
+      dao.addComment(2, "mike", "mike@gmail.com", "test")
+      val (post2, comments2) = dao.loadPost(2)
+      comments2 should have length 2
+      comments2(1) should have(
+        'id (2),
+        'postId (2),
+        'number (2),
+        'author ("mike"),
+        'email ("mike@gmail.com"),
+        'text ("test")
       )
     }
   }

@@ -49,10 +49,10 @@ export function createResetFocusFunction(dispatch) {
 }
 /**
  * @param dispatch Redux dispatch method
- * @returns {function} make reply to specified author
+ * @returns {function} make reply to specified post
  */
 export function createAnswerFunction(dispatch) {
-    return (author) => dispatch({type: REPLY_COMMENT, author: author});
+    return (number) => dispatch({type: REPLY_COMMENT, number: number});
 }
 
 /**
@@ -60,10 +60,10 @@ export function createAnswerFunction(dispatch) {
  * @returns {function} quote specified comment
  */
 export function createQuoteFunction(dispatch) {
-    return (author, comment) => dispatch({
+    return (comment) => dispatch({
         type: QUOTE_COMMENT,
-        author: author,
-        comment: comment
+        author: comment.author,
+        text: comment.text
     });
 }
 

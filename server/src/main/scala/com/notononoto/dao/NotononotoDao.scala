@@ -55,9 +55,13 @@ class NotononotoDao(db: ODatabaseDocumentTx) {
                  author: String,
                  email: String,
                  text: String): Unit = {
-    val comment = Comment(nextSeq(db, "comment_seq"), postId,
-      LocalDateTime.now(), author, email, text)
-    commentToDoc(comment).save()
+    // this intern should be rewrited to locks
+    postId.toString.intern.synchronized {
+      val count = getCommentsCount(postId)
+      val comment = Comment(nextSeq(db, "comment_seq"), postId, count + 1,
+        LocalDateTime.now(), author, email, text)
+      commentToDoc(comment).save()
+    }
   }
 
   /**
@@ -96,6 +100,12 @@ class NotononotoDao(db: ODatabaseDocumentTx) {
     db.close()
   }
 
+  private def getCommentsCount(postId: Long): Long = {
+    getOne(query(db,
+      "select count(*) as count from Comment where post_id=?", postId)).
+        field("count")
+  }
+
   private def findPostDoc(id: Long): ODocument = {
     getOne(query(db, "select * from Post where id=?", id))
   }
@@ -120,6 +130,7 @@ class NotononotoDao(db: ODatabaseDocumentTx) {
     Comment(
       doc.field("id"),
       doc.field("post_id"),
+      doc.field("number"),
       ConverterUtils.stringToDate(doc.field("timestamp")),
       doc.field("author"),
       doc.field("email"),
@@ -131,6 +142,7 @@ class NotononotoDao(db: ODatabaseDocumentTx) {
     new ODocument("Comment").
       field("id", comment.id).
       field("post_id", comment.postId).
+      field("number", comment.number).
       field("timestamp", ConverterUtils.dateToString(comment.timestamp)).
       field("author", comment.author).
       field("email", comment.email).

@@ -46,7 +46,7 @@ object RouteFactory {
     /** Json provider for posts */
     implicit val postProtocol = jsonFormat4(Post)
     /** Json provider for comments */
-    implicit val commentProtocol = jsonFormat6(Comment)
+    implicit val commentProtocol = jsonFormat7(Comment)
     /** Json provider for PostData */
     implicit val postDataProtocol = jsonFormat2(PostData)
   }
@@ -96,7 +96,7 @@ object RouteFactory {
                       removeCut(post.content))
                   // hide email address from client
                   val commentsView = comments.map(c =>
-                    Comment(c.id, c.postId, c.timestamp, c.author, "", c.text))
+                    Comment(c.id, c.postId, c.number, c.timestamp, c.author, "", c.text))
                   complete(jsonResponse(PostData(postView, commentsView).toJson))
                 }
               }
@@ -130,7 +130,6 @@ object RouteFactory {
                   complete("Success")
                 } ~
                 path("posts") {
-                  log.debug("request received")
                   managed(daoCreator.create()) acquireAndGet { dao =>
                     val posts = dao.loadPosts()
                     complete(jsonResponse(posts.toJson))

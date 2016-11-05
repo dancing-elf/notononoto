@@ -11,6 +11,8 @@ final case class Post(id: Long,
 /** Information about comments to post */
 final case class Comment(id: Long,
                          postId: Long,
+                         /** sequence number of comment in post */
+                         number: Long,
                          timestamp: LocalDateTime,
                          author: String,
                          email: String,
