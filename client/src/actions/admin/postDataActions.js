@@ -160,6 +160,11 @@ export function createLoadImagesNamesAction() {
         const postData = getState().postData;
         const authToken = getAuthState(getState());
 
+        // post id not created yet
+        if (!postData.postId) {
+            return;
+        }
+
         axios.get("/api/admin/upload_file/" + postData.postId, undefined, {
             auth: {
                 username: authToken.login,

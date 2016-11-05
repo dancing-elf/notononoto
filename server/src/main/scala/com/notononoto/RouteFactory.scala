@@ -84,7 +84,7 @@ object RouteFactory {
                   // to make very complex data model
                   val posts = dao.loadPosts().map(post =>
                     Post(post.id, post.timestamp, post.header,
-                      getOpening(post.content)))
+                      getOpening(post.content))).reverse
                   complete(jsonResponse(posts.toJson))
                 }
               } ~
@@ -92,9 +92,12 @@ object RouteFactory {
                 managed(daoCreator.create()) acquireAndGet { dao =>
                   val (post, comments) = dao.loadPost(postId)
                   // see comment to /api/public/posts requests
-                  val view = Post(post.id, post.timestamp, post.header,
+                  val postView = Post(post.id, post.timestamp, post.header,
                       removeCut(post.content))
-                  complete(jsonResponse(PostData(view, comments).toJson))
+                  // hide email address from client
+                  val commentsView = comments.map(c =>
+                    Comment(c.id, c.postId, c.timestamp, c.author, "", c.text))
+                  complete(jsonResponse(PostData(postView, commentsView).toJson))
                 }
               }
             } ~
