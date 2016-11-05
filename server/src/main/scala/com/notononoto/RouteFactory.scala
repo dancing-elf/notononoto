@@ -5,7 +5,7 @@ import java.time.LocalDateTime
 
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.model.headers._
-import akka.http.scaladsl.model.{ContentTypes, HttpEntity, HttpResponse}
+import akka.http.scaladsl.model.{ContentTypes, HttpEntity, HttpResponse, StatusCodes}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.directives.Credentials
 import akka.http.scaladsl.server.{RejectionHandler, Route}
@@ -26,6 +26,8 @@ object RouteFactory {
 
   /** Custom tag to separate post opening from post continuation */
   private val NOTONONOTOCUT = "<notononotocut/>"
+  /** Pattern for checking email */
+  private val EMAIL_PATTERN = """^[^\s@]+@[^\s@]+\.[^\s@]+$""".r.pattern
 
   private val log = Logger(LoggerFactory.getLogger(this.getClass))
 
@@ -101,11 +103,17 @@ object RouteFactory {
                 (json) => {
                   val obj = json.asJsObject
                   val postIdLong = jsonField(obj, "postId").toLong
-                  managed(daoCreator.create()) acquireAndGet { dao =>
-                    dao.addComment(postIdLong, jsonField(obj, "author"),
-                      jsonField(obj, "email"), jsonField(obj, "text"))
-                    val comments = dao.loadComments(postIdLong)
-                    complete(jsonResponse(comments.toJson))
+                  val author = jsonField(obj, "author")
+                  val email = jsonField(obj, "email")
+                  val text = jsonField(obj, "text")
+                  if (isValidAuthor(author) && isValidEmail(email) && isValidText(text)) {
+                    managed(daoCreator.create()) acquireAndGet { dao =>
+                      dao.addComment(postIdLong, author, email, text)
+                      val comments = dao.loadComments(postIdLong)
+                      complete(jsonResponse(comments.toJson))
+                    }
+                  } else {
+                    complete(HttpResponse(StatusCodes.BadRequest))
                   }
                 }
               }
@@ -115,7 +123,7 @@ object RouteFactory {
             authenticateBasic(realm = "admin part", authenticator) { user =>
               get {
                 path("login") {
-                  log.debug("success")
+                  log.debug("successful login")
                   complete("Success")
                 } ~
                 path("posts") {
@@ -199,6 +207,18 @@ object RouteFactory {
     get {
       getFromFile(webRoot + "/index.html")
     }
+  }
+
+  private def isValidAuthor(author: String): Boolean = {
+    !author.isEmpty && author.length <= 50
+  }
+
+  private def isValidText(text: String): Boolean = {
+    !text.isEmpty && text.length <= 1000
+  }
+
+  private def isValidEmail(email: String): Boolean = {
+    email.length <= 50 && EMAIL_PATTERN.matcher(email).matches()
   }
 
   private def getFullResPath(postId: Long, webRoot: String): Path = {

@@ -3,11 +3,10 @@ package com.notononoto
 import java.time.LocalDateTime
 
 import akka.http.scaladsl.model.ContentTypes.`application/json`
-import akka.http.scaladsl.model.StatusCodes
+import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers.{BasicHttpCredentials, `Content-Type`}
 import akka.http.scaladsl.testkit.ScalatestRouteTest
-import com.notononoto.dao.NotononotoDao
-import com.notononoto.dao.NotononotoDaoCreator
+import com.notononoto.dao.{Comment, NotononotoDao, NotononotoDaoCreator}
 import org.junit.runner.RunWith
 import org.scalatest._
 import org.scalatest.junit.JUnitRunner
@@ -23,6 +22,7 @@ class RouteTest extends WordSpec with Matchers with ScalatestRouteTest {
   Mockito.when(dao.loadPost(2L)).
     thenReturn((com.notononoto.dao.Post(2L, LocalDateTime.now(), "", ""), List()))
   Mockito.when(dao.isPostExists(2)).thenReturn(true)
+  Mockito.when(dao.loadComments(2)).thenReturn(List[Comment]())
 
   val daoCreator = Mockito.mock(classOf[NotononotoDaoCreator])
   Mockito.when(daoCreator.create()).thenReturn(dao)
@@ -63,6 +63,20 @@ class RouteTest extends WordSpec with Matchers with ScalatestRouteTest {
       val credentials = BasicHttpCredentials("admin", "admin")
       Get("/api/admin/login") ~> addCredentials(credentials) ~> route ~> check {
         responseAs[String] shouldEqual "Success"
+      }
+    }
+    "successfully add comment" in {
+      val request = HttpEntity(ContentTypes.`application/json`,
+        """{"postId": "2", "author": "name", "email": "author@gmail.com", "text": "some text"}""")
+      Post("/api/public/new_comment", request) ~> route ~> check {
+        status shouldBe StatusCodes.OK
+      }
+    }
+    "reject bad email" in {
+      val request = HttpEntity(ContentTypes.`application/json`,
+        """{"postId": "2", "author": "name", "email": "aut hor@gmail.com", "text": "some text"}""")
+      Post("/api/public/new_comment", request) ~> route ~> check {
+        status shouldBe StatusCodes.BadRequest
       }
     }
   }
