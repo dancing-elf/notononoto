@@ -165,7 +165,7 @@ export function createLoadImagesNamesAction() {
             return;
         }
 
-        axios.get("/api/admin/upload_file/" + postData.postId, undefined, {
+        axios.get("/api/admin/upload_file/" + postData.postId, {
             auth: {
                 username: authToken.login,
                 password: authToken.password
