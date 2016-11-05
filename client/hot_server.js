@@ -12,6 +12,10 @@ app.use(proxy('/api', {
     target: 'http://localhost:8080',
     changeOrigin: true
 }));
+app.use(proxy('/res', {
+    target: 'http://localhost:8080',
+    changeOrigin: true
+}));
 app.use(webpackDevMiddleware(compiler, {
     noInfo: true,
     publicPath: config.output.publicPath
