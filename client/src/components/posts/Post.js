@@ -14,7 +14,7 @@ import {createLoadPostFunction} from "../../actions/public/postActions";
 /** Post description */
 export class Post extends Component {
     componentDidMount() {
-        this.props.loadPost(this.props.params.postId);
+        this.props.loadPost(parseInt(this.props.params.postId));
     }
     render() {
         if (!this.props.post.timestamp) {
@@ -31,7 +31,7 @@ export class Post extends Component {
 
 Post.propTypes = {
     params: PropTypes.shape({
-        postId: PropTypes.number.isRequired
+        postId: PropTypes.string.isRequired
     }),
     post: PropTypes.object.isRequired,
     comments: PropTypes.array.isRequired,

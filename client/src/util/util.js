@@ -1,5 +1,6 @@
-import hljs from "highlight.js";
 import showdown from "showdown";
+
+import {getHljs} from "./higlight";
 
 /**
  * @param serverDate date in server format
@@ -25,6 +26,7 @@ export function copy(original, changes) {
  * Highlight note highlighted code blocks on page
  */
 export function highlight() {
+    const hljs = getHljs();
     const nodes = document.querySelectorAll("code:not(.hljs)");
     for (let i = 0; i < nodes.length; ++i) {
         hljs.highlightBlock(nodes[i]);
