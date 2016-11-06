@@ -162,12 +162,20 @@ object RouteFactory {
         }
       }
     } ~
-    (get & pathPrefix("res")) {
-      getFromDirectory(controller.getResPath.toString)
-    } ~
-    // bundle can contain application version
-    (get & pathPrefixTest("bundle" | "favicon.png")) {
-      getFromDirectory(webRoot)
+    get {
+      pathPrefix("res") {
+        getFromDirectory(controller.getResPath.toString)
+      } ~
+      // bundle can contain application version
+      pathPrefixTest("bundle") {
+        // allow to send gzip if client support it
+        encodeResponse {
+          getFromDirectory(webRoot)
+        }
+      } ~
+      path("favicon.png") {
+        getFromFile(webRoot + "/favicon.png")
+      }
     } ~
     get {
       getFromFile(webRoot + "/index.html")
