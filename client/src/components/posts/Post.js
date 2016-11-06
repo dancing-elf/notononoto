@@ -31,7 +31,7 @@ export class Post extends Component {
 
 Post.propTypes = {
     params: PropTypes.shape({
-        postId: PropTypes.string.isRequired
+        postId: PropTypes.number.isRequired
     }),
     post: PropTypes.object.isRequired,
     comments: PropTypes.array.isRequired,

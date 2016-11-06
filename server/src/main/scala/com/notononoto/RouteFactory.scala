@@ -1,37 +1,35 @@
 package com.notononoto
 
-import java.nio.file.{Files, Path, Paths}
 import java.time.LocalDateTime
 
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.model.headers._
-import akka.http.scaladsl.model.{ContentTypes, HttpEntity, HttpResponse, StatusCodes}
+import akka.http.scaladsl.model.{HttpResponse, StatusCodes}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.directives.Credentials
 import akka.http.scaladsl.server.{RejectionHandler, Route}
-import akka.stream.scaladsl.FileIO
-import com.notononoto.dao.{Comment, NotononotoDaoCreator, Post}
+import com.notononoto.controler.NotononotoController
+import com.notononoto.dao.{Comment, Post}
 import com.notononoto.util.ConverterUtils
 import com.typesafe.scalalogging.Logger
 import org.slf4j.LoggerFactory
-import resource._
 import spray.json._
-import com.notononoto.Notononoto._
 
+import scala.concurrent.Await
+import scala.concurrent.duration._
 import scala.util.{Failure, Success}
 
 
 /** Factory for application routing */
 object RouteFactory {
 
-  /** Custom tag to separate post opening from post continuation */
-  private val NOTONONOTOCUT = "<notononotocut/>"
-  /** Pattern for checking email */
-  private val EMAIL_PATTERN = """^[^\s@]+@[^\s@]+\.[^\s@]+$""".r.pattern
-
   private val log = Logger(LoggerFactory.getLogger(this.getClass))
 
-  /** Information about post */
+  /** Requests */
+  final case class NewCommentRequest(postId: Long, author: String, email: String, text: String)
+  final case class NewPostRequest(header: String, content: String)
+  final case class UpdatePostRequest(postId: Long, header: String, content: String)
+  /** Responses */
   final case class PostData(post: Post, comments: List[Comment])
 
   object JsonProtocol extends DefaultJsonProtocol {
@@ -43,80 +41,62 @@ object RouteFactory {
         throw new NotImplementedError("Read of LocalDateTime not supported")
     }
 
-    /** Json provider for posts */
     implicit val postProtocol = jsonFormat4(Post)
-    /** Json provider for comments */
     implicit val commentProtocol = jsonFormat7(Comment)
-    /** Json provider for PostData */
     implicit val postDataProtocol = jsonFormat2(PostData)
+    implicit val newCommentRequest = jsonFormat4(NewCommentRequest)
+    implicit val newPostRequest = jsonFormat2(NewPostRequest)
+    implicit val updatePostRequest = jsonFormat3(UpdatePostRequest)
   }
+
   import JsonProtocol._
 
   /**
     * Create web route
     * @param webRoot directory with frontend's content
-    * @param daoCreator database dao manager
+    * @param controller controller
     * @param adminLogin admin login
     * @param adminPassword admin password
     * @return [[Route]]
     */
-  def createRoute(webRoot: String, daoCreator: NotononotoDaoCreator,
+  def createRoute(webRoot: String, controller: NotononotoController,
                   adminLogin: String, adminPassword: String): Route = {
 
     // Only existed postId can be handled
     val IntNumberExists = IntNumber
-      .flatMap(id => if (isPostExists(id, daoCreator)) Some(id) else None)
+      .flatMap(id => if (controller.isPostExists(id)) Some(id) else None)
     // admin part guard
     val authenticator = createAuthenticator(adminLogin, adminPassword)
 
     pathPrefix("api") {
-      respondWithHeaders(
-        `Access-Control-Allow-Origin`.*,
-        `Cache-Control`(CacheDirectives.`no-cache`)) {
+      respondWithHeaders(`Access-Control-Allow-Origin`.*) {
         handleRejections(RejectionHandler.default) {
           pathPrefix("public") {
             get {
               path("posts") {
-                managed(daoCreator.create()) acquireAndGet { dao =>
-                  // A little bit ugly, but if there will be performance
-                  // problems simple cache will solve it. We need cache here
-                  // in any case, because database requests here. So no reason
-                  // to make very complex data model
-                  val posts = dao.loadPosts().map(post =>
-                    Post(post.id, post.timestamp, post.header,
-                      getOpening(post.content))).reverse
-                  complete(jsonResponse(posts.toJson))
+                complete {
+                  controller.getPublicPostsList
                 }
               } ~
               path("post" / IntNumberExists) { postId =>
-                managed(daoCreator.create()) acquireAndGet { dao =>
-                  val (post, comments) = dao.loadPost(postId)
-                  // see comment to /api/public/posts requests
-                  val postView = Post(post.id, post.timestamp, post.header,
-                      removeCut(post.content))
-                  // hide email address from client
-                  val commentsView = comments.map(c =>
-                    Comment(c.id, c.postId, c.number, c.timestamp, c.author, "", c.text))
-                  complete(jsonResponse(PostData(postView, commentsView).toJson))
+                complete {
+                  val (post, comments) = controller.getPublicPostData(postId)
+                  PostData(post, comments)
                 }
               }
             } ~
             post {
-              (path("new_comment") & entity(as[JsValue])) {
-                (json) => {
-                  val obj = json.asJsObject
-                  val postIdLong = jsonField(obj, "postId").toLong
-                  val author = jsonField(obj, "author")
-                  val email = jsonField(obj, "email")
-                  val text = jsonField(obj, "text")
-                  if (isValidAuthor(author) && isValidEmail(email) && isValidText(text)) {
-                    managed(daoCreator.create()) acquireAndGet { dao =>
-                      dao.addComment(postIdLong, author, email, text)
-                      val comments = dao.loadComments(postIdLong)
-                      complete(jsonResponse(comments.toJson))
+              (path("new_comment") & entity(as[NewCommentRequest])) {
+                (req) => {
+                  complete {
+                    if (controller.isValidAuthor(req.author) &&
+                        controller.isValidEmail(req.email) &&
+                        controller.isValidText(req.text)) {
+                      controller.addComment(
+                        req.postId, req.author, req.email, req.text)
+                    } else {
+                      HttpResponse(StatusCodes.BadRequest)
                     }
-                  } else {
-                    complete(HttpResponse(StatusCodes.BadRequest))
                   }
                 }
               }
@@ -126,67 +106,52 @@ object RouteFactory {
             authenticateBasic(realm = "admin part", authenticator) { user =>
               get {
                 path("login") {
-                  log.debug("successful login")
-                  complete("Success")
+                  complete {
+                    log.debug("successfully logged")
+                    "Successfully logged"
+                  }
                 } ~
                 path("posts") {
-                  managed(daoCreator.create()) acquireAndGet { dao =>
-                    val posts = dao.loadPosts()
-                    complete(jsonResponse(posts.toJson))
+                  complete {
+                    controller.getAdminPostsList
                   }
                 } ~
                 path("post" / IntNumberExists) { postId =>
-                  managed(daoCreator.create()) acquireAndGet { dao =>
-                    val (post, comments) = dao.loadPost(postId)
-                    complete(jsonResponse(PostData(post, comments).toJson))
+                  complete {
+                    val (post, comments) = controller.getAdminPostData(postId)
+                    PostData(post, comments)
                   }
                 } ~
                 path("upload_file" / IntNumber) { postId =>
-                  val path = getFullResPath(postId, webRoot)
-                  if (Files.exists(path)) {
-                    val files = path.toFile.listFiles.toList.map(_.getName())
-                    complete(jsonResponse(files.toJson))
-                  } else {
-                    complete(jsonResponse(List[String]().toJson))
+                  complete {
+                    controller.getUploadedFiles(postId)
                   }
                 }
               } ~
               post {
-                (path("new_post") & entity(as[JsValue])) {
-                  (json) => {
-                    val obj = json.asJsObject
-                    managed(daoCreator.create()) acquireAndGet { dao =>
-                      dao.createPost(jsonField(obj, "header"),
-                                     jsonField(obj, "content"))
+                (path("new_post") & entity(as[NewPostRequest])) {
+                  (req) => {
+                    complete {
+                      controller.createPost(req.header, req.content)
+                      HttpResponse(StatusCodes.OK)
                     }
-                    complete("Success")
                   }
                 } ~
-                (path("update_post") & entity(as[JsValue])) {
-                  (json) => {
-                    val obj = json.asJsObject
-                    managed(daoCreator.create()) acquireAndGet { dao =>
-                      dao.updatePost(jsonField(obj, "postId").toLong,
-                                     jsonField(obj, "header"),
-                                     jsonField(obj, "content"))
-                      complete("Success")
+                (path("update_post") & entity(as[UpdatePostRequest])) {
+                  (req) => {
+                    complete {
+                      controller.updatePost(req.postId, req.header, req.content)
+                      HttpResponse(StatusCodes.OK)
                     }
                   }
                 } ~
                 (path("upload_file" / IntNumberExists) & fileUpload("file")) {
                   case (postId, (fileInfo, fileStream)) =>
-                    val dir = getFullResPath(postId, webRoot)
-                    if (Files.notExists(dir)) {
-                      this.synchronized {
-                        Files.createDirectories(dir)
-                      }
-                    }
-                    val file = dir.resolve(fileInfo.fileName)
-                    log.debug("try write file: {}", file)
-                    val writeResult = fileStream.runWith(FileIO.toPath(file))
-                    onSuccess(writeResult) { result =>
+                    complete {
+                      val future = controller.uploadFile(postId, fileInfo, fileStream)
+                      val result = Await.result(future, 30.second)
                       result.status match {
-                        case Success(_) => complete("Success")
+                        case Success(_) => HttpResponse(StatusCodes.OK)
                         case Failure(e) => throw e
                       }
                     }
@@ -198,7 +163,7 @@ object RouteFactory {
       }
     } ~
     (get & pathPrefix("res")) {
-      getFromDirectory(getResPath(webRoot).toString)
+      getFromDirectory(controller.getResPath.toString)
     } ~
     (get & path("bundle.js")) {
       getFromFile(webRoot + "/bundle.js")
@@ -211,26 +176,6 @@ object RouteFactory {
     }
   }
 
-  private def isValidAuthor(author: String): Boolean = {
-    !author.isEmpty && author.length <= 50
-  }
-
-  private def isValidText(text: String): Boolean = {
-    !text.isEmpty && text.length <= 1000
-  }
-
-  private def isValidEmail(email: String): Boolean = {
-    email.length <= 50 && EMAIL_PATTERN.matcher(email).matches()
-  }
-
-  private def getFullResPath(postId: Long, webRoot: String): Path = {
-    getResPath(webRoot).resolve(postId.toString)
-  }
-
-  private def getResPath(webRoot: String): Path = {
-    Paths.get(webRoot).resolve("../db/res")
-  }
-
   /**
     * @param login admin login
     * @param password admin password
@@ -241,29 +186,5 @@ object RouteFactory {
     case p@Credentials.Provided(id)
       if id == login && p.verify(password) => Some(id)
     case _ => None
-  }
-
-  private def isPostExists(id: Long,
-                           daoCreator: NotononotoDaoCreator): Boolean = {
-    managed(daoCreator.create()) acquireAndGet { dao =>
-      dao.isPostExists(id)
-    }
-  }
-
-  private def jsonField(obj: JsObject, name: String): String = {
-    obj.fields(name).convertTo[String]
-  }
-
-  private def jsonResponse(json: JsValue): HttpResponse = {
-    HttpResponse(entity=
-      HttpEntity(ContentTypes.`application/json`, json.compactPrint))
-  }
-
-  private def getOpening(content: String): String = {
-    content.split(NOTONONOTOCUT)(0)
-  }
-
-  private def removeCut(content: String): String = {
-    content.replaceFirst(NOTONONOTOCUT, "")
   }
 }

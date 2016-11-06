@@ -96,7 +96,7 @@ export class CommentForm extends Component {
 }
 
 CommentForm.propTypes = {
-    postId: PropTypes.string.isRequired,
+    postId: PropTypes.number.isRequired,
 
     submit: PropTypes.func.isRequired,
     updateAuthor: PropTypes.func.isRequired,

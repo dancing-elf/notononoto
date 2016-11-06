@@ -72,7 +72,7 @@ class PostData extends Component {
 }
 
 PostData.propTypes = {
-    postId: PropTypes.string,
+    postId: PropTypes.number,
     post: PropTypes.shape({
         timestamp: PropTypes.string.isRequired,
         header: PropTypes.string.isRequired,

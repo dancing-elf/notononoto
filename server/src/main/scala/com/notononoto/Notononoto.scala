@@ -6,17 +6,13 @@ import java.util.Properties
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.stream.ActorMaterializer
-import com.notononoto.dao.NotononotoDaoCreator
+import com.notononoto.controler.NotononotoController
+import resource._
 
 import scala.io.StdIn
-import resource._
 
 
 object Notononoto {
-
-  implicit val system = ActorSystem("ws-actors")
-  implicit val materializer = ActorMaterializer()
-  implicit val executionContext = system.dispatcher
 
   final case class NotononotoConfig(host: String, port: Integer,
                                     adminLogin: String, adminPassword: String)
@@ -29,14 +25,20 @@ object Notononoto {
     }
     val root = args(0)
 
-    val config: NotononotoConfig = readProps(root + "/conf/notononoto.properties")
-    val daoCreator = NotononotoDaoCreator(root + "/db")
+    val config = readProps(root + "/conf/notononoto.properties")
+
+    implicit val system = ActorSystem("ws-actors")
+    implicit val materializer = ActorMaterializer()
+    implicit val executionContext = system.dispatcher
+
+    val controller = NotononotoController(root + "/db")
+
     val route = RouteFactory.createRoute(
-      root + "/webapp", daoCreator, config.adminLogin, config.adminPassword)
+      root + "/webapp", controller, config.adminLogin, config.adminPassword)
     val bindingFuture = Http().bindAndHandle(route, config.host, config.port)
 
-    println("Server online at http://" + config.host + ":" + config.port +
-      "/\nPress RETURN to stop...")
+    println(s"Server online at http://${config.host}:${config.port}\n" +
+            "Press RETURN to stop...")
     StdIn.readLine()
 
     bindingFuture.flatMap(_.unbind()).onComplete(_ => {

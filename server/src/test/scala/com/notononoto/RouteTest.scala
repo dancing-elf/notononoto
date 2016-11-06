@@ -6,6 +6,7 @@ import akka.http.scaladsl.model.ContentTypes.`application/json`
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers.{BasicHttpCredentials, `Content-Type`}
 import akka.http.scaladsl.testkit.ScalatestRouteTest
+import com.notononoto.controler.NotononotoController
 import com.notononoto.dao.{Comment, NotononotoDao, NotononotoDaoCreator}
 import org.junit.runner.RunWith
 import org.scalatest._
@@ -27,8 +28,9 @@ class RouteTest extends WordSpec with Matchers with ScalatestRouteTest {
   val daoCreator = Mockito.mock(classOf[NotononotoDaoCreator])
   Mockito.when(daoCreator.create()).thenReturn(dao)
 
+  val controller = new NotononotoController(daoCreator, "")(null)
 
-  val route = RouteFactory.createRoute("", daoCreator, "admin", "admin")
+  val route = RouteFactory.createRoute("", controller, "admin", "admin")
 
   "The server" should {
     "correctly handle posts list request" in {
@@ -62,19 +64,19 @@ class RouteTest extends WordSpec with Matchers with ScalatestRouteTest {
     "login successful" in {
       val credentials = BasicHttpCredentials("admin", "admin")
       Get("/api/admin/login") ~> addCredentials(credentials) ~> route ~> check {
-        responseAs[String] shouldEqual "Success"
+        status shouldBe StatusCodes.OK
       }
     }
     "successfully add comment" in {
       val request = HttpEntity(ContentTypes.`application/json`,
-        """{"postId": "2", "author": "name", "email": "author@gmail.com", "text": "some text"}""")
+        """{"postId": 2, "author": "name", "email": "author@gmail.com", "text": "some text"}""")
       Post("/api/public/new_comment", request) ~> route ~> check {
         status shouldBe StatusCodes.OK
       }
     }
     "reject bad email" in {
       val request = HttpEntity(ContentTypes.`application/json`,
-        """{"postId": "2", "author": "name", "email": "aut hor@gmail.com", "text": "some text"}""")
+        """{"postId": 2, "author": "name", "email": "aut hor@gmail.com", "text": "some text"}""")
       Post("/api/public/new_comment", request) ~> route ~> check {
         status shouldBe StatusCodes.BadRequest
       }

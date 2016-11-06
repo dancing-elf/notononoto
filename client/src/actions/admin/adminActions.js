@@ -35,7 +35,7 @@ export function createOpenPostFunction(dispatch) {
         }).then(function (response) {
             dispatch({
                 type: OPEN_POST,
-                postId: postId.toString(),
+                postId: postId,
                 post: response.data.post,
                 comments: response.data.comments
             });

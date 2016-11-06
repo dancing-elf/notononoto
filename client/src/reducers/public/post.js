@@ -2,7 +2,7 @@ import {copy} from "../../util/util";
 import {LOAD_POST, UPDATE_COMMENTS} from "../../actions/ActionTypes";
 
 const initialState = {
-    postId: "",
+    postId: null,
     post: {
         timestamp: "",
         header: "",
@@ -50,7 +50,7 @@ export function getCommentsState(state) {
 
 /**
  * @param state global redux state
- * @returns {string} post id
+ * @returns {number} post id
  */
 export function getPostIdState(state) {
     return state.post.postId;
