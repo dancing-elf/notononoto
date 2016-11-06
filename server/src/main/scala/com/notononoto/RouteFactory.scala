@@ -165,11 +165,9 @@ object RouteFactory {
     (get & pathPrefix("res")) {
       getFromDirectory(controller.getResPath.toString)
     } ~
-    (get & path("bundle.js")) {
-      getFromFile(webRoot + "/bundle.js")
-    } ~
-    (get & path("favicon.png")) {
-      getFromFile(webRoot + "/favicon.png")
+    // bundle can contain application version
+    (get & pathPrefixTest("bundle" | "favicon.png")) {
+      getFromDirectory(webRoot)
     } ~
     get {
       getFromFile(webRoot + "/index.html")

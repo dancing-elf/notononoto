@@ -1,3 +1,5 @@
+import org.apache.tools.ant.filters.ReplaceTokens
+
 
 task build() {
     // Maybe inputs.file too simple for incremental build,
@@ -21,14 +23,17 @@ task build() {
         exec {
             commandLine "npm", "run", "build"
         }
-        if (!new File("$prodOutDir/bundle.js").exists()) {
+        def bundle = new File("$prodOutDir/bundle.js")
+        if (!bundle.exists()) {
             throw new GradleException("$prodOutDir/bundle.js is not created")
         }
+        bundle.renameTo("$prodOutDir/bundle-${version}.js")
         // As we want to have full frontend distribution in
         // build folder let's copy index.html and favicon
         copy {
-            from "src/index.html"
+            from ("src/index.html")
             into prodOutDir
+            filter(ReplaceTokens, tokens: [version: version])
         }
         copy {
             from "src/favicon.png"
