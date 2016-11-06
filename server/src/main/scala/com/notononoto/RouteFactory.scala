@@ -8,7 +8,7 @@ import akka.http.scaladsl.model.{HttpResponse, StatusCodes}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.directives.Credentials
 import akka.http.scaladsl.server.{RejectionHandler, Route}
-import com.notononoto.controler.NotononotoController
+import com.notononoto.controller.NotononotoController
 import com.notononoto.dao.{Comment, Post}
 import com.notononoto.util.ConverterUtils
 import com.typesafe.scalalogging.Logger

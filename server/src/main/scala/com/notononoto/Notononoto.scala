@@ -1,21 +1,27 @@
 package com.notononoto
 
 import java.io.FileInputStream
+import java.security.{KeyStore, SecureRandom}
 import java.util.Properties
+import javax.net.ssl.{KeyManagerFactory, SSLContext, TrustManagerFactory}
 
 import akka.actor.ActorSystem
-import akka.http.scaladsl.Http
+import akka.http.scaladsl.{ConnectionContext, Http, HttpsConnectionContext}
 import akka.stream.ActorMaterializer
-import com.notononoto.controler.NotononotoController
+import com.notononoto.controller.NotononotoController
 import resource._
 
 import scala.io.StdIn
 
 
+/** Application's entry point */
 object Notononoto {
 
+  /** Config of application */
   final case class NotononotoConfig(host: String, port: Integer,
-                                    adminLogin: String, adminPassword: String)
+                                    adminLogin: String, adminPassword: String,
+                                    useHttps: Boolean,
+                                    certPath: String, certPass: String)
 
   def main(args: Array[String]): Unit = {
 
@@ -25,7 +31,8 @@ object Notononoto {
     }
     val root = args(0)
 
-    val config = readProps(root + "/conf/notononoto.properties")
+    val configRoot = root + "/conf"
+    val config = readProps(configRoot + "/notononoto.properties")
 
     implicit val system = ActorSystem("ws-actors")
     implicit val materializer = ActorMaterializer()
@@ -35,10 +42,18 @@ object Notononoto {
 
     val route = RouteFactory.createRoute(
       root + "/webapp", controller, config.adminLogin, config.adminPassword)
+
+    if (config.useHttps) {
+      val httpsContext = getHttpsContext(
+        config.certPath, config.certPass.toCharArray, configRoot)
+      Http().setDefaultServerHttpContext(httpsContext)
+    }
+
     val bindingFuture = Http().bindAndHandle(route, config.host, config.port)
 
-    println(s"Server online at http://${config.host}:${config.port}\n" +
-            "Press RETURN to stop...")
+    println(s"Server online at " +
+      s"${if (config.useHttps) "https" else "http"}://${config.host}:${config.port}\n" +
+      "Press RETURN to stop...")
     StdIn.readLine()
 
     bindingFuture.flatMap(_.unbind()).onComplete(_ => {
@@ -47,6 +62,38 @@ object Notononoto {
     })
   }
 
+  /**
+    * Prepare https context
+    * @param path path to certificate
+    * @param password keystore password
+    * @param configRoot config folder
+    * @return [[HttpsConnectionContext]]
+    */
+  private def getHttpsContext(path: String,
+                              password: Array[Char],
+                              configRoot: String): HttpsConnectionContext = {
+
+    val ks: KeyStore = KeyStore.getInstance("PKCS12")
+    managed(new FileInputStream(path)) acquireAndGet { is =>
+      ks.load(is, password)
+    }
+
+    val keyManagerFactory = KeyManagerFactory.getInstance("SunX509")
+    keyManagerFactory.init(ks, password)
+
+    val tmf = TrustManagerFactory.getInstance("SunX509")
+    tmf.init(ks)
+
+    val sslContext = SSLContext.getInstance("TLS")
+    sslContext.init(keyManagerFactory.getKeyManagers, tmf.getTrustManagers,
+      new SecureRandom())
+    ConnectionContext.https(sslContext)
+  }
+
+  /**
+    * @param file property file
+    * @return application config
+    */
   private def readProps(file: String): NotononotoConfig = {
     val props = new Properties()
     managed(new FileInputStream(file)) acquireAndGet { stream =>
@@ -55,7 +102,10 @@ object Notononoto {
         props.getProperty("host"),
         props.getProperty("port").toInt,
         props.getProperty("adminLogin"),
-        props.getProperty("adminPassword")
+        props.getProperty("adminPassword"),
+        props.getProperty("useHttps").toBoolean,
+        props.getProperty("certPath"),
+        props.getProperty("certPass")
       )
     }
   }

@@ -6,7 +6,7 @@ import akka.http.scaladsl.model.ContentTypes.`application/json`
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.model.headers.{BasicHttpCredentials, `Content-Type`}
 import akka.http.scaladsl.testkit.ScalatestRouteTest
-import com.notononoto.controler.NotononotoController
+import com.notononoto.controller.NotononotoController
 import com.notononoto.dao.{Comment, NotononotoDao, NotononotoDaoCreator}
 import org.junit.runner.RunWith
 import org.scalatest._

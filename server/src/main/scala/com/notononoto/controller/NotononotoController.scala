@@ -1,4 +1,4 @@
-package com.notononoto.controler
+package com.notononoto.controller
 
 import java.nio.file.{Files, Path, Paths}
 
@@ -12,9 +12,7 @@ import resource._
 import scala.concurrent.Future
 
 
-/**
-  * Implementation of routing methods
-  */
+/** Implementation of routing methods */
 class NotononotoController(daoCreator: NotononotoDaoCreator, dbRoot: String)
                           (implicit materializer: Materializer) {
 
@@ -120,10 +118,18 @@ class NotononotoController(daoCreator: NotononotoDaoCreator, dbRoot: String)
     }
   }
 
+  /**
+    * @param content post content
+    * @return part of post for index page
+    */
   private def getOpening(content: String): String = {
     content.split(NOTONONOTOCUT)(0)
   }
 
+  /**
+    * @param content post content
+    * @return post content without custom tags
+    */
   private def removeCut(content: String): String = {
     content.replaceFirst(NOTONONOTOCUT, "")
   }
