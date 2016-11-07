@@ -8,7 +8,9 @@ import javax.net.ssl.{KeyManagerFactory, SSLContext, TrustManagerFactory}
 
 import akka.actor.ActorSystem
 import akka.event.Logging
-import akka.http.scaladsl.model.HttpRequest
+import akka.http.scaladsl.model.{HttpRequest, StatusCodes}
+import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.directives.{DebuggingDirectives, LogEntry}
 import akka.http.scaladsl.{ConnectionContext, Http, HttpsConnectionContext}
 import akka.stream.ActorMaterializer
@@ -16,8 +18,8 @@ import com.notononoto.controller.NotononotoController
 import org.slf4j.bridge.SLF4JBridgeHandler
 import resource._
 
-import scala.concurrent.duration._
 import scala.concurrent.Await
+import scala.concurrent.duration._
 
 
 /** Application's entry point */
@@ -27,7 +29,14 @@ object Notononoto {
   final case class NotononotoConfig(host: String, port: Integer,
                                     adminLogin: String, adminPassword: String,
                                     useHttps: Boolean,
-                                    certPath: String, certPass: String)
+                                    certPath: String, certPass: String,
+                                    redirectPort: Integer)
+
+
+  implicit val system = ActorSystem("ws-actors")
+  implicit val materializer = ActorMaterializer()
+  implicit val executionContext = system.dispatcher
+
 
   def main(args: Array[String]): Unit = {
 
@@ -42,34 +51,51 @@ object Notononoto {
 
     prepareJulLogging()
 
-    implicit val system = ActorSystem("ws-actors")
-    implicit val materializer = ActorMaterializer()
-    implicit val executionContext = system.dispatcher
-
     val controller = NotononotoController(root + "/db")
 
     val route = RouteFactory.createRoute(
       root + "/webapp", controller, config.adminLogin, config.adminPassword)
 
     if (config.useHttps) {
-      val httpsContext = getHttpsContext(
-        config.certPath, config.certPass.toCharArray, configRoot)
-      Http().setDefaultServerHttpContext(httpsContext)
+      initHttps(route, config)
+    } else {
+      initHttp(route, config)
     }
+  }
 
-    def requestAsString(req: HttpRequest): LogEntry =
-      LogEntry(req.toString, Logging.DebugLevel)
-    val logRequest = DebuggingDirectives.logRequest(requestAsString _)
+  def initHttps(route: Route, config: NotononotoConfig): Unit = {
 
-    val bindingFuture = Http().bindAndHandle(logRequest(route), config.host, config.port)
+    val httpsContext = getHttpsContext(
+      config.certPath, config.certPass.toCharArray)
 
-    println(s"Server online at " +
-      s"${if (config.useHttps) "https" else "http"}://${config.host}:${config.port}\n" +
-      "Press Ctrl-C to stop...")
+    val httpsBindingFuture = Http().bindAndHandle(
+      addRequestLogging(route), config.host, config.port, httpsContext)
+    // add route for http for best user expirience
+    val httpBindingFuture = Http().bindAndHandle(
+      getRedirectRoute(config), config.host, config.redirectPort)
+
+    printStartMessage(config)
 
     // We should terminate system properly when Ctrl-C or SIGTERM events
     // received. When we can properly terminate program from shutdown.sh
     // without complex methods
+    sys.addShutdownHook({
+      println("Shutdown server...")
+      Await.result(httpBindingFuture.flatMap(_.unbind()), 15.second)
+      Await.result(httpsBindingFuture.flatMap(_.unbind()), 15.second)
+      Await.result(system.terminate(), 15.second)
+      println("Server is down")
+    })
+  }
+
+  def initHttp(route: Route, config: NotononotoConfig): Unit = {
+
+    val bindingFuture = Http().bindAndHandle(
+      addRequestLogging(route), config.host, config.port)
+
+    printStartMessage(config)
+
+    // see comment in initHttps method
     sys.addShutdownHook({
       println("Shutdown server...")
       Await.result(bindingFuture.flatMap(_.unbind()), 15.second)
@@ -78,16 +104,36 @@ object Notononoto {
     })
   }
 
+  def printStartMessage(config: NotononotoConfig): Unit = {
+    println(s"Server online at " +
+      s"${if (config.useHttps) "https" else "http"}://${config.host}:${config.port}\n" +
+      "Press Ctrl-C to stop...")
+  }
+
+  def addRequestLogging(route: Route): Route = {
+    def requestAsString(req: HttpRequest): LogEntry =
+      LogEntry(req.toString, Logging.DebugLevel)
+    val logRequest = DebuggingDirectives.logRequest(requestAsString _)
+    logRequest(route)
+  }
+
+  def getRedirectRoute(config: NotononotoConfig): Route = {
+    extractUri { uri =>
+      val httpsUri = uri.withScheme("https")
+      val hasPort = httpsUri.authority.port != 0
+      val newUri = if (hasPort) httpsUri.withPort(config.port) else httpsUri
+      redirect(newUri, StatusCodes.PermanentRedirect)
+    }
+  }
+
   /**
     * Prepare https context
     * @param path path to certificate
     * @param password keystore password
-    * @param configRoot config folder
     * @return [[HttpsConnectionContext]]
     */
   private def getHttpsContext(path: String,
-                              password: Array[Char],
-                              configRoot: String): HttpsConnectionContext = {
+                              password: Array[Char]): HttpsConnectionContext = {
 
     val ks: KeyStore = KeyStore.getInstance("PKCS12")
     managed(new FileInputStream(path)) acquireAndGet { is =>
@@ -131,7 +177,8 @@ object Notononoto {
         props.getProperty("adminPassword"),
         props.getProperty("useHttps").toBoolean,
         props.getProperty("certPath"),
-        props.getProperty("certPass")
+        props.getProperty("certPass"),
+        props.getProperty("redirectPort").toInt
       )
     }
   }
