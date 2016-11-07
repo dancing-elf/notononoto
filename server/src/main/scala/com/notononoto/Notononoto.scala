@@ -11,6 +11,8 @@ import akka.stream.ActorMaterializer
 import com.notononoto.controller.NotononotoController
 import resource._
 
+import scala.concurrent.Await
+import scala.concurrent.duration._
 import scala.io.StdIn
 
 
@@ -53,13 +55,21 @@ object Notononoto {
 
     println(s"Server online at " +
       s"${if (config.useHttps) "https" else "http"}://${config.host}:${config.port}\n" +
-      "Press RETURN to stop...")
-    StdIn.readLine()
+      "Press Ctrl-C to stop...")
 
-    bindingFuture.flatMap(_.unbind()).onComplete(_ => {
-      println("Shutdown server...")
-      system.terminate()
+    // We should terminate system properly when Ctrl-C or SIGTERM events
+    // received. When we can properly terminate program from shutdown.sh
+    // without complex methods
+    Runtime.getRuntime.addShutdownHook(new Thread() {
+      override def run(): Unit = {
+        println("Shutdown server...")
+        Await.result(bindingFuture.flatMap(_.unbind()), 15.second)
+        Await.result(system.terminate(), 15.second)
+        println("Server is down")
+      }
     })
+
+    StdIn.readLine
   }
 
   /**
