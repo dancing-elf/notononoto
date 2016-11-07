@@ -3,12 +3,17 @@ package com.notononoto
 import java.io.FileInputStream
 import java.security.{KeyStore, SecureRandom}
 import java.util.Properties
+import java.util.logging.Level
 import javax.net.ssl.{KeyManagerFactory, SSLContext, TrustManagerFactory}
 
 import akka.actor.ActorSystem
+import akka.event.Logging
+import akka.http.scaladsl.model.HttpRequest
+import akka.http.scaladsl.server.directives.{DebuggingDirectives, LogEntry}
 import akka.http.scaladsl.{ConnectionContext, Http, HttpsConnectionContext}
 import akka.stream.ActorMaterializer
 import com.notononoto.controller.NotononotoController
+import org.slf4j.bridge.SLF4JBridgeHandler
 import resource._
 
 import scala.concurrent.Await
@@ -36,6 +41,8 @@ object Notononoto {
     val configRoot = root + "/conf"
     val config = readProps(configRoot + "/notononoto.properties")
 
+    prepareJulLogging()
+
     implicit val system = ActorSystem("ws-actors")
     implicit val materializer = ActorMaterializer()
     implicit val executionContext = system.dispatcher
@@ -51,7 +58,11 @@ object Notononoto {
       Http().setDefaultServerHttpContext(httpsContext)
     }
 
-    val bindingFuture = Http().bindAndHandle(route, config.host, config.port)
+    def requestAsString(req: HttpRequest): LogEntry =
+      LogEntry(req.toString, Logging.DebugLevel)
+    val logRequest = DebuggingDirectives.logRequest(requestAsString _)
+
+    val bindingFuture = Http().bindAndHandle(logRequest(route), config.host, config.port)
 
     println(s"Server online at " +
       s"${if (config.useHttps) "https" else "http"}://${config.host}:${config.port}\n" +
@@ -98,6 +109,16 @@ object Notononoto {
     sslContext.init(keyManagerFactory.getKeyManagers, tmf.getTrustManagers,
       new SecureRandom())
     ConnectionContext.https(sslContext)
+  }
+
+  /**
+    * Prepare logging for java.util.logging
+    */
+  private def prepareJulLogging(): Unit = {
+    SLF4JBridgeHandler.removeHandlersForRootLogger()
+    SLF4JBridgeHandler.install()
+    val logger = java.util.logging.Logger.getLogger("com.orientechnologies")
+    logger.setLevel(Level.ALL)
   }
 
   /**
