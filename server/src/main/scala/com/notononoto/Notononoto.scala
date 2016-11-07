@@ -16,9 +16,8 @@ import com.notononoto.controller.NotononotoController
 import org.slf4j.bridge.SLF4JBridgeHandler
 import resource._
 
-import scala.concurrent.Await
 import scala.concurrent.duration._
-import scala.io.StdIn
+import scala.concurrent.Await
 
 
 /** Application's entry point */
@@ -71,16 +70,12 @@ object Notononoto {
     // We should terminate system properly when Ctrl-C or SIGTERM events
     // received. When we can properly terminate program from shutdown.sh
     // without complex methods
-    Runtime.getRuntime.addShutdownHook(new Thread() {
-      override def run(): Unit = {
-        println("Shutdown server...")
-        Await.result(bindingFuture.flatMap(_.unbind()), 15.second)
-        Await.result(system.terminate(), 15.second)
-        println("Server is down")
-      }
+    sys.addShutdownHook({
+      println("Shutdown server...")
+      Await.result(bindingFuture.flatMap(_.unbind()), 15.second)
+      Await.result(system.terminate(), 15.second)
+      println("Server is down")
     })
-
-    StdIn.readLine
   }
 
   /**
