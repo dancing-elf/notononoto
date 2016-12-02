@@ -33,9 +33,9 @@ object Notononoto {
                                     redirectPort: Integer)
 
 
-  implicit val system = ActorSystem("ws-actors")
-  implicit val materializer = ActorMaterializer()
-  implicit val executionContext = system.dispatcher
+  private implicit val system = ActorSystem("ws-actors")
+  private implicit val materializer = ActorMaterializer()
+  private implicit val executionContext = system.dispatcher
 
 
   def main(args: Array[String]): Unit = {

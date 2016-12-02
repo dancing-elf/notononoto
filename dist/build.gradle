@@ -1,4 +1,7 @@
-apply plugin: "distribution"
+
+plugins {
+    id "distribution"
+}
 
 evaluationDependsOn(":server")
 evaluationDependsOn(":client")

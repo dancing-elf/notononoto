@@ -1,43 +1,47 @@
 import org.apache.tools.ant.filters.ReplaceTokens
 
+plugins {
+    id "com.moowork.node" version "0.14"
+}
 
-task build() {
-    // Maybe inputs.file too simple for incremental build,
-    // but it should work well in most cases. At least only
-    // excessive builds possible.
-    inputs.file projectDir
-    // Output for production will be in 'prod' folder. Output
-    // for react hot redeploy server was set to 'dev' folder.
-    // In fact it never create this folder but for clarity
-    // we configure separated folders for dev and production
-    // mode
-    def prodOutDir = "$buildDir/prod"
-    outputs.dir prodOutDir
+node {
+    version = '6.9.1'
+    download = true
+}
+
+task installDependencies(type: NpmTask) {
+    inputs.file "$projectDir/package.json"
+    outputs.dir "$projectDir/node_modules"
+    args = ["install"]
+}
+
+task build(type: NpmTask) {
+    dependsOn installDependencies
+
+    inputs.files fileTree(dir: projectDir, exclude: "build")
+    // Output for react hot redeploy server was set to 'dev' folder.
+    // In fact it never create this folder so simply use buildDir here.
+    outputs.dir buildDir
+    // webpack will be invoked with "npm run build" and
+    // resulting bundle.js will be saved to build folder
+    // by webpack itself (see webpack.config.js)
+    args = ["run", "build"]
     doLast {
-        // webpack will be invoked with "npm run build" and
-        // resulting bundle.js will be saved to build folder
-        // by webpack itself (see webpack.config.js)
-        exec {
-            commandLine "npm", "install"
-        }
-        exec {
-            commandLine "npm", "run", "build"
-        }
-        def bundle = new File("$prodOutDir/bundle.js")
+        def bundle = new File("$buildDir/bundle.js")
         if (!bundle.exists()) {
-            throw new GradleException("$prodOutDir/bundle.js is not created")
+            throw new GradleException("$buildDir/bundle.js is not created")
         }
-        bundle.renameTo("$prodOutDir/bundle-${version}.js")
+        bundle.renameTo("$buildDir/bundle-${version}.js")
         // As we want to have full frontend distribution in
         // build folder let's copy index.html and favicon
         copy {
             from ("src/index.html")
-            into prodOutDir
+            into buildDir
             filter(ReplaceTokens, tokens: [version: version])
         }
         copy {
             from "src/favicon.png"
-            into prodOutDir
+            into buildDir
         }
     }
 }

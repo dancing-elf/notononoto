@@ -3,7 +3,7 @@ const webpack = require("webpack");
 
 const PATHS = {
     src: path.join(__dirname, "src"),
-    build: path.join(__dirname, "build/prod")
+    build: path.join(__dirname, "build")
 };
 
 module.exports = {
