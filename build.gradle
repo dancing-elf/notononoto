@@ -1,6 +1,6 @@
 allprojects {
     group = "com.notononoto"
-    version = "0.1"
+    version = "0.2"
 }
 
 task wrapper(type: Wrapper) {
